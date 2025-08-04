@@ -1,0 +1,21 @@
+SECRET_KEY=your-super-secret-key-change-in-production
+DATABASE_URL=sqlite:///birthday_app.db
+
+# SMTP Configuration
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USE_SSL=False
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_DEFAULT_SENDER=your-email@gmail.com
+
+# Celery Configuration
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+
+# Application Configuration
+TIMEZONE=Europe/Kyiv
+EMAIL_SEND_TIME=9
+RETRY_ATTEMPTS=3
+RETRY_DELAY=300

@@ -1,0 +1,17 @@
+<aside class="hidden w-64 flex-col bg-white p-4 md:flex shadow-lg">
+  <div class="mb-8 text-2xl font-bold text-gray-800">
+    🎂 BirthdayApp
+  </div>
+  <nav class="flex-1 space-y-2">
+    <a href="{{ url_for('dashboard.index') }}"
+       class="flex items-center rounded-lg p-3 {% if request.path == url_for('dashboard.index') %}text-white bg-blue-600{% else %}text-gray-600 hover:bg-gray-200{% endif %}">
+      <span class="text-xl">🏠</span>
+      <span class="ml-3 font-semibold">Дашборд</span>
+    </a>
+    <a href="{{ url_for('employees.get_employees') }}"
+       class="flex items-center rounded-lg p-3 {% if request.path.startswith('/employees') %}text-white bg-blue-600{% else %}text-gray-600 hover:bg-gray-200{% endif %}">
+      <span class="text-xl">👥</span>
+      <span class="ml-3 font-semibold">Співробітники</span>
+    </a>
+  </nav>
+</aside>

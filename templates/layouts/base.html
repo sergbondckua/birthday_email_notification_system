@@ -1,28 +1,40 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}BirthdayApp{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-      body {
-          font-family: 'Nunito Sans', sans-serif;
-      }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BirthdayApp{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Можна додати свій CSS тут -->
 </head>
-<body class="bg-gray-100">
-<div class="flex h-screen">
-  {% include 'partials/_sidebar.html' %}
+<body class="bg-gray-100 text-gray-900">
 
-  <div class="flex flex-1 flex-col">
-    <main class="flex-1 p-6 md:p-8">
-      {% block content %}{% endblock %}
+    <!-- Навігаційна панель -->
+    <header class="bg-white shadow">
+        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-bold text-gray-800">🎉 BirthdayApp</h1>
+                <nav class="space-x-4 text-sm text-gray-600">
+                    <a href="/" class="hover:text-gray-800 font-medium">Дашборд</a>
+                    <a href="/employees/" class="hover:text-gray-800">Співробітники</a>
+                    <a href="/templates/" class="hover:text-gray-800">Шаблони</a>
+                    <a href="/logout/" class="hover:text-red-600">Вихід</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основний вміст -->
+    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
     </main>
-  </div>
-</div>
+
+    <!-- Футер -->
+    <footer class="bg-white shadow mt-12">
+        <div class="mx-auto max-w-7xl px-4 py-6 text-center text-sm text-gray-500">
+            © {{ current_year }} BirthdayApp. Усі права захищено.
+        </div>
+    </footer>
+
 </body>
 </html>

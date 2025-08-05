@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, render_template, jsonify
 from flask_login import login_required
 from services.birthday_service import BirthdayService
 from models import Employee, EmailTemplate, EmailLog
@@ -8,125 +8,60 @@ dashboard_bp = Blueprint("dashboard", __name__)
 
 
 @dashboard_bp.route("/", methods=["GET"])
-@login_required
+# @login_required
 def dashboard():
     """Головна сторінка з оглядом"""
     try:
-        # Найближчі дні народження
-        upcoming_birthdays = BirthdayService.get_upcoming_birthdays(14)
+        # Отримуємо всі необхідні дані
+        upcoming_birthdays = BirthdayService.get_upcoming_birthdays(
+            days_ahead=14
+        )
+        today_birthdays = BirthdayService.get_birthday_employees(date.today())
 
-        # Загальна статистика
-        total_employees = Employee.query.count()
-        active_templates = EmailTemplate.query.filter_by(
-            is_active=True
-        ).count()
+        # Збираємо статистику
+        stats = {
+            "total_employees": Employee.query.count(),
+            "active_templates": EmailTemplate.query.filter_by(
+                is_active=True
+            ).count(),
+            "monthly_emails": EmailLog.query.filter(
+                EmailLog.sent_date >= date.today().replace(day=1),
+                EmailLog.status == "sent",
+            ).count(),
+            "today_birthdays_count": len(today_birthdays),
+        }
 
-        # Статистика розсилки за поточний місяць
-        current_month_start = date.today().replace(day=1)
-        monthly_emails = EmailLog.query.filter(
-            EmailLog.sent_date >= current_month_start,
-            EmailLog.status == "sent",
-        ).count()
-
-        # Дні народження сьогодні
-        today = date.today()
-        today_birthdays = BirthdayService.get_birthday_employees(today)
-
-        return (
-            jsonify(
-                {
-                    "dashboard": {
-                        "stats": {
-                            "total_employees": total_employees,
-                            "active_templates": active_templates,
-                            "monthly_emails": monthly_emails,
-                            "today_birthdays": len(today_birthdays),
-                        },
-                        "upcoming_birthdays": [
-                            {
-                                "employee": {
-                                    "id": item["employee"].id,
-                                    "full_name": item["employee"].full_name,
-                                    "email": item["employee"].email,
-                                },
-                                "birthday_date": item[
-                                    "birthday_date"
-                                ].isoformat(),
-                                "days_until": item["days_until"],
-                            }
-                            for item in upcoming_birthdays
-                        ],
-                        "today_birthdays": [
-                            {
-                                "id": emp.id,
-                                "full_name": emp.full_name,
-                                "email": emp.email,
-                                "birth_date": emp.birth_date.isoformat(),
-                            }
-                            for emp in today_birthdays
-                        ],
-                    }
-                }
-            ),
-            200,
+        # Рендеримо HTML-шаблон, передаючи в нього дані
+        return render_template(
+            "dashboard.html",
+            stats=stats,
+            upcoming_birthdays=upcoming_birthdays,
+            today_birthdays=today_birthdays,
         )
 
     except Exception as e:
-        return (
-            jsonify({"error": f"Помилка завантаження дашборду: {str(e)}"}),
-            500,
-        )
+        # У разі помилки можна показати сторінку з помилкою
+        return render_template("error.html", error_message=str(e)), 500
 
 
 @dashboard_bp.route("/calendar/<int:year>/<int:month>", methods=["GET"])
-@login_required
+# @login_required
 def calendar_data(year, month):
-    """Дані календаря для конкретного місяця"""
+    """Дані календаря для конкретного місяця (API Endpoint)"""
     try:
-        birthday_service = BirthdayService()
-        # Дні народження цього місяця
-        birthdays = birthday_service.get_birthdays_for_month(year, month)
+        birthdays = BirthdayService.get_birthdays_for_month(year, month)
 
-        # Дні повідомлень
-        notifications = birthday_service.get_notification_calendar(year, month)
-
+        # Форматуємо дані для JSON
+        birthdays_data = [
+            {
+                "day": item["day"],
+                "employee_name": item["employee"].full_name,
+            }
+            for item in birthdays
+        ]
         return (
             jsonify(
-                {
-                    "calendar": {
-                        "year": year,
-                        "month": month,
-                        "birthdays": [
-                            {
-                                "employee": {
-                                    "id": item["employee"].id,
-                                    "full_name": item["employee"].full_name,
-                                    "email": item["employee"].email,
-                                },
-                                "date": item["date"].isoformat(),
-                                "day": item["day"],
-                            }
-                            for item in birthdays
-                        ],
-                        "notifications": {
-                            str(day): [
-                                {
-                                    "employee": {
-                                        "id": item["employee"].id,
-                                        "full_name": item[
-                                            "employee"
-                                        ].full_name,
-                                    },
-                                    "birthday_date": item[
-                                        "birthday_date"
-                                    ].isoformat(),
-                                }
-                                for item in items
-                            ]
-                            for day, items in notifications.items()
-                        },
-                    }
-                }
+                {"year": year, "month": month, "birthdays": birthdays_data}
             ),
             200,
         )

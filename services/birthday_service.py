@@ -106,3 +106,11 @@ class BirthdayService:
                 )
 
         return notifications
+
+    @staticmethod
+    def get_birthday_employees(today):
+        """Отримати співробітників з ДН в конкретну дату"""
+        return Employee.query.filter(
+            db.extract("month", Employee.birth_date) == today.month,
+            db.extract("day", Employee.birth_date) == today.day,
+        ).all()

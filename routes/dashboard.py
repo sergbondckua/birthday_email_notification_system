@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from flask_login import login_required
 from services.birthday_service import BirthdayService
 from models import Employee, EmailTemplate, EmailLog
-from datetime import datetime, date
+from datetime import date
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -83,11 +83,12 @@ def dashboard():
 def calendar_data(year, month):
     """Дані календаря для конкретного місяця"""
     try:
+        birthday_service = BirthdayService()
         # Дні народження цього місяця
-        birthdays = BirthdayService.get_birthdays_for_month(year, month)
+        birthdays = birthday_service.get_birthdays_for_month(year, month)
 
         # Дні повідомлень
-        notifications = BirthdayService.get_notification_calendar(year, month)
+        notifications = birthday_service.get_notification_calendar(year, month)
 
         return (
             jsonify(

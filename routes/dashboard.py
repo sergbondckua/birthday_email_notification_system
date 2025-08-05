@@ -6,9 +6,6 @@ from datetime import date
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
-@dashboard_bp.context_processor
-def inject_request():
-    return dict(request=request)
 
 @dashboard_bp.route("/", methods=["GET"])
 # @login_required

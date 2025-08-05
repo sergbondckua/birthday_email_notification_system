@@ -40,3 +40,9 @@ class Config:
     EMAIL_SEND_TIME = env.int("EMAIL_SEND_TIME")
     RETRY_ATTEMPTS = env.int("RETRY_ATTEMPTS")
     RETRY_DELAY = env.int("RETRY_DELAY")
+
+    # Налаштування сесій
+    SESSION_COOKIE_HTTPONLY = True  # Заборонити доступ до кук через JavaScript
+    SESSION_COOKIE_SECURE = False  # Передавати куки тільки через HTTPS
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SECURE = True

@@ -2,8 +2,6 @@ from typing import Dict, Any, List
 
 from datetime import date
 
-from celery import shared_task
-
 from services.email_service import EmailService
 from models import EmailTemplate
 from app import create_app, celery
@@ -14,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@shared_task
+@celery.task
 def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
     """Щоденна задача для відправки повідомлень про ДН"""
 

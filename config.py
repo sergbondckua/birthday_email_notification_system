@@ -32,7 +32,6 @@ class Config:
     result_backend = (
         env.str("CELERY_RESULT_BACKEND") or "redis://localhost:6379/0"
     )
-    CELERY_IMPORTS = ("tasks.celery_tasks",)
 
     # Часова зона
     TIMEZONE = env.str("TIMEZONE")

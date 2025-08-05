@@ -1,6 +1,5 @@
 import logging
 
-from celery.schedules import crontab
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -28,32 +27,6 @@ def create_app(config_class: type[Config] = Config) -> Flask:
 
     # Ініціалізація Celery
     celery.conf.update(app.config)
-
-    # Налаштування часової зони
-    celery.conf.timezone = app.config.get("TIMEZONE", "UTC")
-
-    # Додаємо розклад для Celery Beat
-    celery.conf.beat_schedule = {
-        "daily-birthday-check": {
-            "task": "tasks.celery_tasks.send_daily_birthday_notifications",
-            "schedule": crontab(
-                hour=app.config.get(
-                    "EMAIL_SEND_TIME", 9
-                )
-            ),
-        },
-    }
-
-    # Імпорт модуля з завданнями ПІСЛЯ ініціалізації celery
-    from tasks import celery_tasks  # Додайте цей рядок
-
-    # Контекст для Celery
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
 
     # Налаштування Flask-Login
     login_manager.login_view = "auth.login"

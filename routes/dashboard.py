@@ -6,7 +6,7 @@ from datetime import date
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
-@app.context_processor
+@dashboard_bp.context_processor
 def inject_request():
     return dict(request=request)
 

@@ -28,6 +28,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
 
     # Ініціалізація Celery
     celery.conf.update(app.config)
+    from tasks import celery_tasks  # імпортуємо, щоб зареєструвати задачі
 
     # Налаштування часової зони
     celery.conf.timezone = app.config.get("TIMEZONE", "UTC")

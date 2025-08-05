@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify
 from flask_login import login_required
 from services.birthday_service import BirthdayService
 from models import Employee, EmailTemplate, EmailLog

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from flask_login import login_required
 from models import Employee
 from app import db
@@ -10,7 +10,7 @@ employees_bp = Blueprint("employees", __name__)
 
 
 @employees_bp.route("/", methods=["GET"])
-@login_required
+# @login_required
 def get_employees():
     """Отримати список всіх співробітників"""
     try:
@@ -33,27 +33,8 @@ def get_employees():
             page=page, per_page=per_page, error_out=False
         )
 
-        return (
-            jsonify(
-                {
-                    "employees": [
-                        {
-                            "id": emp.id,
-                            "first_name": emp.first_name,
-                            "last_name": emp.last_name,
-                            "full_name": emp.full_name,
-                            "email": emp.email,
-                            "birth_date": emp.birth_date.isoformat(),
-                            "created_at": emp.created_at.isoformat(),
-                        }
-                        for emp in employees.items
-                    ],
-                    "total": employees.total,
-                    "pages": employees.pages,
-                    "current_page": page,
-                }
-            ),
-            200,
+        return render_template(
+            "employees.html", employees=employees, search=search
         )
 
     except Exception as e:

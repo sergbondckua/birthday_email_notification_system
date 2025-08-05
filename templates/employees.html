@@ -1,0 +1,141 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Співробітники{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+      <i class="fas fa-users me-2"></i>
+      Співробітники
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <a href="#" class="btn btn-primary">
+          <i class="fas fa-user-plus me-2"></i>
+          Додати співробітника
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      {% if employees.items %}
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <th>Ім'я</th>
+              <th>Email</th>
+              <th>Дата народження</th>
+              <th>Дії</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for employee in employees.items %}
+              <tr>
+                <td>
+                  <strong>{{ employee.full_name }}</strong>
+
+                </td>
+                <td>{{ employee.email }}</td>
+                <td>{{ employee.birth_date.strftime('%d.%m.%Y') }}</td>
+
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="#" class="btn btn-outline-primary">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <button type="button" class="btn btn-outline-danger"
+                            onclick="confirmDelete('{{ employee.full_name }}', '#')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if employees.pages > 1 %}
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              {% if employees.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('admin.employees', page=employees.prev_num) }}">Попередня</a>
+                </li>
+              {% endif %}
+
+              {% for page_num in employees.iter_pages() %}
+                {% if page_num %}
+                  {% if page_num != employees.page %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('employees.get_employees', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item active">
+                      <span class="page-link">{{ page_num }}</span>
+                    </li>
+                  {% endif %}
+                {% else %}
+                  <li class="page-item disabled">
+                    <span class="page-link">…</span>
+                  </li>
+                {% endif %}
+              {% endfor %}
+
+              {% if employees.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('employees.get_employees', page=employees.next_num) }}">Наступна</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+
+      {% else %}
+        <div class="text-center py-5">
+          <i class="fas fa-users fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">Співробітників поки немає</h5>
+          <p class="text-muted">Додайте першого співробітника, щоб почати відстежувати дні народження</p>
+          <a href="{{ url_for('admin.add_employee') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-2"></i>
+            Додати співробітника
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Delete confirmation modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Підтвердження видалення</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Ви дійсно хочете видалити співробітника <strong id="employeeName"></strong>?</p>
+          <p class="text-muted small">Ця дія незворотна. Також будуть видалені всі пов'язані логи розсилки.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+          <form id="deleteForm" method="POST" style="display: inline;">
+            <button type="submit" class="btn btn-danger">Видалити</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+      function confirmDelete(employeeName, deleteUrl) {
+          document.getElementById('employeeName').textContent = employeeName;
+          document.getElementById('deleteForm').action = deleteUrl;
+          new bootstrap.Modal(document.getElementById('deleteModal')).show();
+      }
+  </script>
+{% endblock %}

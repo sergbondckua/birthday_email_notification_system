@@ -8,8 +8,11 @@ from typing import List, Tuple
 
 
 class EmailService:
+    """Сервіс для відправки електронних листів"""
+
     @staticmethod
     def get_timezone():
+        """Отримати часову зону з поточного конфігу."""
         return pytz.timezone(current_app.config["TIMEZONE"])
 
     @staticmethod
@@ -38,18 +41,19 @@ class EmailService:
 
         return notification_date
 
-    @staticmethod
     def get_employees_for_notification(
+        self,
         notification_date: date,
     ) -> List[Employee]:
         """Отримати список співробітників для яких потрібно відправити повідомлення"""
         employees_to_notify = []
         current_year = notification_date.year
 
-        all_employees = Employee.query.all()
+        all_employees = Employee.query.all()  # Отримати всіх співробітників
 
+        # Знаходимо співробітників, які повинні отримати повідомлення
         for employee in all_employees:
-            expected_notification_date = EmailService.get_notification_date(
+            expected_notification_date = self.get_notification_date(
                 employee.birth_date, current_year
             )
 
@@ -66,9 +70,8 @@ class EmailService:
         formatted_text = formatted_text.replace("{date}", formatted_date)
         return formatted_text
 
-    @staticmethod
     def send_birthday_notification(
-        employee: Employee, template: EmailTemplate
+        self, employee: Employee, template: EmailTemplate
     ) -> Tuple[bool, str]:
         """Відправити повідомлення про ДН конкретного співробітника"""
         try:
@@ -82,10 +85,10 @@ class EmailService:
                 return False, "Немає отримувачів для розсилки"
 
             # Форматування повідомлення
-            formatted_subject = EmailService.format_template(
+            formatted_subject = self.format_template(
                 template.subject, employee
             )
-            formatted_body = EmailService.format_template(
+            formatted_body = self.format_template(
                 template.template_text, employee
             )
 

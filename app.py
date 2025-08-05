@@ -9,7 +9,7 @@ from config import Config
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
-celery = Celery()
+celery = Celery(__name__)
 
 
 def create_app(config_class: Config = Config) -> Flask:
@@ -22,14 +22,12 @@ def create_app(config_class: Config = Config) -> Flask:
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    celery.conf.update(app.config)
 
     # Налаштування Flask-Login
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Будь ласка, увійдіть для доступу до цієї сторінки.'
     login_manager.login_message_category = 'info'
-
-    # Ініціалізація Celery
-    celery.conf.update(app.config)
 
     # Реєстрація блюпринтів
     from routes.auth import auth_bp

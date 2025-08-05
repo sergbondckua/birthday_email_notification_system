@@ -43,7 +43,7 @@ class Employee(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now())
 
     # Зв'язки
     email_logs = db.relationship("EmailLog", backref="employee", lazy=True)

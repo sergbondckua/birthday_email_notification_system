@@ -6,7 +6,7 @@ env.read_env()
 
 
 class Config:
-    """Клас конфігурації Flask-додатку."""
+    """Клас конфігурації Flask додатку."""
 
     SECRET_KEY = (
         env.str("SECRET_KEY") or "JJJHou8u^8556@(*5CCHHnvhvggvgfccf!"
@@ -26,10 +26,10 @@ class Config:
     MAIL_DEFAULT_SENDER = env.str("MAIL_DEFAULT_SENDER")
 
     # Налаштування Celery
-    CELERY_BROKER_URL = (
+    broker_url = (
         env.str("CELERY_BROKER_URL") or "redis://localhost:6379/0"
     )
-    CELERY_RESULT_BACKEND = (
+    result_backend = (
         env.str("CELERY_RESULT_BACKEND") or "redis://localhost:6379/0"
     )
 

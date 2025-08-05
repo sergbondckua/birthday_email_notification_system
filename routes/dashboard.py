@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, request
 from flask_login import login_required
 from services.birthday_service import BirthdayService
 from models import Employee, EmailTemplate, EmailLog
@@ -6,6 +6,9 @@ from datetime import date
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
+@app.context_processor
+def inject_request():
+    return dict(request=request)
 
 @dashboard_bp.route("/", methods=["GET"])
 # @login_required

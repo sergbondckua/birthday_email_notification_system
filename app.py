@@ -29,6 +29,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     # Ініціалізація Celery
     celery.conf.update(app.config)
     from tasks import celery_tasks  # імпортуємо, щоб зареєструвати задачі
+    app.app_context().push()
 
     # Налаштування часової зони
     celery.conf.timezone = app.config.get("TIMEZONE", "UTC")
@@ -46,12 +47,12 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     }
 
     # Контекст для Celery
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
+    # class ContextTask(celery.Task):
+    #     def __call__(self, *args, **kwargs):
+    #         with app.app_context():
+    #             return self.run(*args, **kwargs)
+    #
+    # celery.Task = ContextTask
 
     # Налаштування Flask-Login
     login_manager.login_view = "auth.login"

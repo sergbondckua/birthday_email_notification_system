@@ -1,0 +1,37 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('dashboard') if url_for else '/' }}">
+            <i class="fas fa-birthday-cake me-2"></i>BirthdayApp
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' else '' }}"
+                       href="{{ url_for('dashboard') if url_for else '/' }}">
+                        <i class="fas fa-tachometer-alt me-1"></i>Дашборд
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'employees' else '' }}"
+                       href="{{ url_for('employees') if url_for else '/employees/' }}">
+                        <i class="fas fa-users me-1"></i>Співробітники
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'templates' else '' }}"
+                       href="{{ url_for('templates') if url_for else '/templates/' }}">
+                        <i class="fas fa-file-alt me-1"></i>Шаблони
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{{ url_for('logout') if url_for else '/logout/' }}">
+                        <i class="fas fa-sign-out-alt me-1"></i>Вихід
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

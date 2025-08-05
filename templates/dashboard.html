@@ -3,87 +3,142 @@
 {% block title %}Дашборд - BirthdayApp{% endblock %}
 
 {% block content %}
-  <div class="space-y-6">
-    <h2 class="text-2xl font-bold text-gray-800">Огляд</h2>
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-        <p class="truncate text-sm font-medium text-gray-500">Всього співробітників</p>
-        <p class="mt-1 text-3xl font-semibold text-gray-900">{{ stats.total_employees }}</p>
-      </div>
-      <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-        <p class="truncate text-sm font-medium text-gray-500">Активних шаблонів</p>
-        <p class="mt-1 text-3xl font-semibold text-gray-900">{{ stats.active_templates }}</p>
-      </div>
-      <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-        <p class="truncate text-sm font-medium text-gray-500">Листів цього місяця</p>
-        <p class="mt-1 text-3xl font-semibold text-gray-900">{{ stats.monthly_emails }}</p>
-      </div>
-      <div class="overflow-hidden rounded-lg bg-blue-500 p-5 text-white shadow">
-        <p class="truncate text-sm font-medium text-blue-100">Дні народження сьогодні 🎂</p>
-        <p class="mt-1 text-3xl font-semibold">{{ stats.today_birthdays_count }}</p>
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="display-4 section-title">
+        <i class="fas fa-chart-line me-3"></i>Огляд
+      </h1>
+    </div>
+  </div>
+
+  <!-- Статистичні картки -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-3 col-md-6">
+      <div class="card stat-card">
+        <div class="card-body text-center p-4">
+          <div class="mb-3">
+            <i class="fas fa-users fa-2x text-primary"></i>
+          </div>
+          <h5 class="card-title text-muted mb-2">Всього співробітників</h5>
+          <h2 class="display-4 fw-bold text-dark">{{ stats.total_employees }}</h2>
+        </div>
       </div>
     </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card stat-card">
+        <div class="card-body text-center p-4">
+          <div class="mb-3">
+            <i class="fas fa-file-alt fa-2x text-success"></i>
+          </div>
+          <h5 class="card-title text-muted mb-2">Активних шаблонів</h5>
+          <h2 class="display-4 fw-bold text-dark">{{ stats.active_templates }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card stat-card">
+        <div class="card-body text-center p-4">
+          <div class="mb-3">
+            <i class="fas fa-envelope fa-2x text-warning"></i>
+          </div>
+          <h5 class="card-title text-muted mb-2">Листів цього місяця</h5>
+          <h2 class="display-4 fw-bold text-dark">{{ stats.monthly_emails }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card birthday-special-card">
+        <div class="card-body text-center p-4">
+          <div class="mb-3">
+            <i class="fas fa-birthday-cake fa-2x animate-bounce"></i>
+          </div>
+          <h5 class="card-title mb-2 opacity-75">
+            Дні народження сьогодні <i class="fas fa-gift ms-1"></i>
+          </h5>
+          <h2 class="display-4 fw-bold">{{ stats.today_birthdays_count }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <div class="lg:col-span-2">
-        <div class="rounded-lg bg-white p-6 shadow">
-          <h3 class="text-lg font-semibold text-gray-900">Найближчі 14 днів</h3>
-          <div class="mt-4 flow-root">
-            <ul role="list" class="-my-5 divide-y divide-gray-200">
-              {% for item in upcoming_birthdays %}
-                <li class="py-4">
-                  <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0">
-                      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-lg">
-                        {{ item.employee.full_name[0] }}
-                      </div>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <p class="truncate font-medium text-gray-900">{{ item.employee.full_name }}</p>
-                      <p class="truncate text-sm text-gray-500">{{ item.employee.email }}</p>
-                    </div>
-                    <div>
-                                    <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium
-                                        {% if item.days_until == 0 %} bg-blue-100 text-blue-800 {% elif item.days_until < 4 %} bg-yellow-100 text-yellow-800 {% else %} bg-green-100 text-green-800 {% endif %}">
-                                        {{ item.birthday_date.strftime('%d %B') }} (через {{ item.days_until }}
-                                      {% if item.days_until == 1 %}день{% elif item.days_until in [2,3,4] %}
-                                        дні{% else %}днів{% endif %})
-                                    </span>
-                    </div>
+  <div class="row g-4">
+    <!-- Найближчі дні народження -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header bg-transparent border-0 p-4">
+          <h3 class="section-title mb-0">
+            <i class="fas fa-calendar-day me-2"></i>Найближчі 14 днів
+          </h3>
+        </div>
+        <div class="card-body p-4">
+          <div class="list-group list-group-flush">
+            {% for item in upcoming_birthdays %}
+              <div class="list-group-item upcoming-birthday-item border-0 mb-3 p-3">
+                <div class="d-flex align-items-center">
+                  <div class="employee-avatar">
+                    {{ item.employee.full_name[0] }}
                   </div>
-                </li>
-              {% else %}
-                <li class="py-4 text-center text-gray-500">
-                  У найближчі 14 днів немає днів народження.
-                </li>
-              {% endfor %}
-            </ul>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1 fw-semibold">{{ item.employee.full_name }}</h6>
+                    <p class="mb-0 text-muted small">
+                      <i class="fas fa-envelope me-1"></i>{{ item.employee.email }}
+                    </p>
+                  </div>
+                  <div>
+                                    <span class="badge
+                                        {% if item.days_until == 0 %}badge-today{% elif item.days_until < 4 %}badge-warning{% else %}badge-success{% endif %}
+                                        rounded-pill px-3 py-2">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ item.birthday_date.strftime('%d %B') }}
+                                        ({% if item.days_until == 0 %}сьогодні{% else %}через {{ item.days_until }}
+                                      {% if item.days_until == 1 %}день{% elif item.days_until in [2,3,4] %}дні
+                                      {% else %}днів{% endif %}{% endif %})
+                                    </span>
+                  </div>
+                </div>
+              </div>
+            {% else %}
+              <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                <p class="text-muted">У найближчі 14 днів немає днів народження.</p>
+              </div>
+            {% endfor %}
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="lg:col-span-1">
-        <div class="rounded-lg bg-white p-6 shadow">
-          <h3 class="text-lg font-semibold text-gray-900">Іменинники сьогодні ✨</h3>
-          <div class="mt-4">
-            {% if today_birthdays %}
-              <ul class="space-y-3">
-                {% for emp in today_birthdays %}
-                  <li class="flex items-center space-x-3 rounded-md bg-green-50 p-3">
-                    <div class="flex-shrink-0">
-                      <span class="text-xl">🥳</span>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <p class="font-semibold text-green-800">{{ emp.full_name }}</p>
-                      <p class="text-sm text-green-700">Вітаємо!</p>
-                    </div>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p class="text-center text-gray-500">Сьогодні ніхто не святкує.</p>
-            {% endif %}
-          </div>
+    <!-- Іменинники сьогодні -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header bg-transparent border-0 p-4">
+          <h3 class="section-title mb-0">
+            <i class="fas fa-star me-2"></i>Іменинники сьогодні <i class="fas fa-sparkles ms-1"></i>
+          </h3>
+        </div>
+        <div class="card-body p-4">
+          {% if today_birthdays %}
+            {% for emp in today_birthdays %}
+              <div class="today-celebration p-4 {% if not loop.last %}mb-3{% endif %}">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="fas fa-birthday-cake fa-2x text-success"></i>
+                  </div>
+                  <div>
+                    <h5 class="mb-1 fw-bold text-success">{{ emp.full_name }}</h5>
+                    <p class="mb-0 text-success">
+                      <i class="fas fa-party-horn me-1"></i>Вітаємо з днем народження!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-5">
+              <i class="fas fa-meh fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Сьогодні ніхто не святкує.</p>
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>

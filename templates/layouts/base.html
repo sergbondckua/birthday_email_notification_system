@@ -198,7 +198,10 @@
 </head>
 <body>
 <!-- Навігаційна панель -->
-{% include 'includes/navbar.html' %}
+{% block navbar %}
+  {% include 'includes/navbar.html' %}
+{% endblock %}
+
 
 <!-- Основний вміст -->
 <main class="container my-5">

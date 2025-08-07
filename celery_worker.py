@@ -13,7 +13,7 @@ celery.conf.beat_schedule = {
     "daily-birthday-check": {
         "task": "tasks.celery_tasks.send_daily_birthday_notifications",
         "schedule": crontab(
-            hour=flask_app.config.get("EMAIL_SEND_TIME")
+            minute="17", hour="23" # hour=flask_app.config.get("EMAIL_SEND_TIME")
         ),  # час запуску
     },
 }

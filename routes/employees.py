@@ -10,9 +10,49 @@ employees_bp = Blueprint("employees", __name__)
 
 
 @employees_bp.route("/", methods=["GET"])
-# @login_required
-def get_employees():
-    """Отримати список всіх співробітників"""
+@login_required
+def employees_page():
+    """Відобразити сторінку співробітників"""
+    # Якщо це AJAX запит, повертаємо JSON
+    if request.headers.get("Content-Type") == "application/json":
+        return get_employees_api()
+
+    # Інакше відображаємо HTML сторінку
+    try:
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get(
+            "per_page", 12, type=int
+        )  # 12 для красивої сітки 4x3
+        search = request.args.get("search", "").strip()
+
+        query = Employee.query
+
+        if search:
+            query = query.filter(
+                db.or_(
+                    Employee.first_name.ilike(f"%{search}%"),
+                    Employee.last_name.ilike(f"%{search}%"),
+                    Employee.email.ilike(f"%{search}%"),
+                )
+            )
+
+        employees = query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+
+        return render_template("employees.html", employees=employees)
+
+    except Exception as e:
+        # У випадку помилки показуємо порожню сторінку
+        return render_template(
+            "employees.html", employees=None, error=f"Помилка: {str(e)}"
+        )
+
+
+@employees_bp.route("/api", methods=["GET"])
+@login_required
+def get_employees_api():
+    """API endpoint для отримання списку співробітників"""
     try:
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 10, type=int)
@@ -33,8 +73,27 @@ def get_employees():
             page=page, per_page=per_page, error_out=False
         )
 
-        return render_template(
-            "employees.html", employees=employees, search=search
+        return (
+            jsonify(
+                {
+                    "employees": [
+                        {
+                            "id": emp.id,
+                            "first_name": emp.first_name,
+                            "last_name": emp.last_name,
+                            "full_name": emp.full_name,
+                            "email": emp.email,
+                            "birth_date": emp.birth_date.isoformat(),
+                            "created_at": emp.created_at.isoformat(),
+                        }
+                        for emp in employees.items
+                    ],
+                    "total": employees.total,
+                    "pages": employees.pages,
+                    "current_page": page,
+                }
+            ),
+            200,
         )
 
     except Exception as e:

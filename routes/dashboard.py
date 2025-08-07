@@ -8,7 +8,7 @@ dashboard_bp = Blueprint("dashboard", __name__)
 
 
 @dashboard_bp.route("/", methods=["GET"])
-# @login_required
+@login_required
 def dashboard():
     """Головна сторінка з оглядом"""
     try:
@@ -45,7 +45,7 @@ def dashboard():
 
 
 @dashboard_bp.route("/calendar/<int:year>/<int:month>", methods=["GET"])
-# @login_required
+@login_required
 def calendar_data(year, month):
     """Дані календаря для конкретного місяця (API Endpoint)"""
     try:

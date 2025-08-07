@@ -48,7 +48,7 @@ def reset_db():
         click.echo("База даних успішно скинута!")
 
 
-@app.cli.command()
+@app.cli.command("createsuperuser")
 @with_appcontext
 def create_superuser():
     """Створити першого супер-адміністратора"""

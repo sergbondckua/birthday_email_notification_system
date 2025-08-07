@@ -1,0 +1,298 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Керування Шаблонами - BirthdayApp{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-0">Керування Шаблонами Email</h2>
+    <button class="btn btn-primary" id="createTemplateBtn">
+      <i class="fas fa-plus me-2"></i>Створити Шаблон
+    </button>
+  </div>
+
+  <!-- Контейнер для сповіщень -->
+  <div id="alert-container"></div>
+
+  <!-- Список шаблонів -->
+  <div class="row" id="templates-list">
+    {% for template in templates %}
+      <div class="col-lg-6 mb-4" id="template-card-{{ template.id }}">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title">{{ template.name }}</h5>
+              {% if template.is_active %}
+                <span class="badge badge-success">Активний</span>
+              {% endif %}
+            </div>
+            <h6 class="card-subtitle mb-2 text-muted">{{ template.subject }}</h6>
+            <p class="card-text text-truncate">{{ template.template_text }}</p>
+          </div>
+          <div class="card-footer bg-transparent border-top-0 d-flex justify-content-end gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="openPreviewModal({{ template.id }})">
+              <i class="fas fa-eye me-1"></i> Перегляд
+            </button>
+            <button class="btn btn-sm btn-outline-primary"
+                    onclick="openEditModal({{ template.id }}, '{{ template.name }}', '{{ template.subject }}', `{{ template.template_text | safe }}`, {{ 'true' if template.is_active else 'false' }})">
+              <i class="fas fa-edit me-1"></i> Редагувати
+            </button>
+            {% if not template.is_active %}
+              <button class="btn btn-sm btn-outline-success" onclick="activateTemplate({{ template.id }})">
+                <i class="fas fa-check-circle me-1"></i> Активувати
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="openDeleteModal({{ template.id }})">
+                <i class="fas fa-trash-alt me-1"></i> Видалити
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="col-12">
+        <div class="card text-center py-5">
+          <div class="card-body">
+            <h4 class="card-title">Шаблони не знайдено</h4>
+            <p class="card-text">Схоже, ви ще не створили жодного шаблону. Почніть зі створення нового!</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Модальне вікно для Створення/Редагування -->
+  <div class="modal fade" id="templateModal" tabindex="-1" aria-labelledby="templateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="templateModalLabel">Створити Новий Шаблон</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="templateForm">
+            <input type="hidden" id="templateId" name="template_id">
+            <div class="mb-3">
+              <label for="templateName" class="form-label">Назва Шаблону</label>
+              <input type="text" class="form-control" id="templateName" required minlength="3">
+            </div>
+            <div class="mb-3">
+              <label for="templateSubject" class="form-label">Тема Листа</label>
+              <input type="text" class="form-control" id="templateSubject" required>
+            </div>
+            <div class="mb-3">
+              <label for="templateText" class="form-label">Текст Шаблону</label>
+              <textarea class="form-control" id="templateText" rows="10" required></textarea>
+              <div class="form-text">
+                Доступні змінні: <code>{name}</code>, <code>{date}</code>.
+              </div>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" role="switch" id="templateIsActive">
+              <label class="form-check-label" for="templateIsActive">Зробити цей шаблон активним</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+          <button type="button" class="btn btn-primary" id="saveTemplateBtn">Зберегти</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальне вікно Попереднього Перегляду -->
+  <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previewModalLabel">Попередній Перегляд</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="employeeSelect" class="form-label">Перегляд для співробітника:</label>
+            <select class="form-select" id="employeeSelect">
+              {% for employee in employees %}
+                <option value="{{ employee.id }}">{{ employee.full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <hr>
+          <h6>Тема:</h6>
+          <p class="lead" id="previewSubject"></p>
+          <h6>Тіло листа:</h6>
+          <div class="p-3 bg-light rounded border" id="previewBody" style="white-space: pre-wrap;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальне вікно підтвердження видалення -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Підтвердити Видалення</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Ви впевнені, що хочете видалити цей шаблон? Цю дію неможливо буде скасувати.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Видалити</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+      const templateModal = new bootstrap.Modal(document.getElementById('templateModal'));
+      const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+      const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+      const form = document.getElementById('templateForm');
+
+      // Функція для показу сповіщень
+      function showAlert(message, type = 'success') {
+          const alertContainer = document.getElementById('alert-container');
+          const alert = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+          alertContainer.innerHTML = alert;
+      }
+
+      // Відкриття модального вікна для створення
+      document.getElementById('createTemplateBtn').addEventListener('click', () => {
+          form.reset();
+          document.getElementById('templateId').value = '';
+          document.getElementById('templateModalLabel').textContent = 'Створити Новий Шаблон';
+          templateModal.show();
+      });
+
+      // Відкриття модального вікна для редагування
+      function openEditModal(id, name, subject, text, isActive) {
+          form.reset();
+          document.getElementById('templateId').value = id;
+          document.getElementById('templateName').value = name;
+          document.getElementById('templateSubject').value = subject;
+          document.getElementById('templateText').value = text;
+          document.getElementById('templateIsActive').checked = isActive;
+          document.getElementById('templateModalLabel').textContent = 'Редагувати Шаблон';
+          templateModal.show();
+      }
+
+      // Збереження шаблону (створення/оновлення)
+      document.getElementById('saveTemplateBtn').addEventListener('click', async () => {
+          const templateId = document.getElementById('templateId').value;
+          const url = templateId ? `/templates/api/${templateId}` : '/templates/api';
+          const method = templateId ? 'PUT' : 'POST';
+
+          const data = {
+              name: document.getElementById('templateName').value,
+              subject: document.getElementById('templateSubject').value,
+              template_text: document.getElementById('templateText').value,
+              is_active: document.getElementById('templateIsActive').checked,
+          };
+
+          try {
+              const response = await fetch(url, {
+                  method: method,
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify(data),
+              });
+              const result = await response.json();
+
+              if (response.ok) {
+                  templateModal.hide();
+                  showAlert(result.message, 'success');
+                  // Оновлюємо сторінку, щоб побачити зміни
+                  setTimeout(() => window.location.reload(), 1000);
+              } else {
+                  showAlert(result.error, 'danger');
+              }
+          } catch (error) {
+              showAlert('Сталася мережева помилка.', 'danger');
+          }
+      });
+
+      // Активація шаблону
+      async function activateTemplate(id) {
+          try {
+              const response = await fetch(`/templates/api/${id}/activate`, {method: 'POST'});
+              const result = await response.json();
+              if (response.ok) {
+                  showAlert(result.message, 'success');
+                  setTimeout(() => window.location.reload(), 1000);
+              } else {
+                  showAlert(result.error, 'danger');
+              }
+          } catch (error) {
+              showAlert('Сталася мережева помилка.', 'danger');
+          }
+      }
+
+      // Відкриття модального вікна видалення
+      function openDeleteModal(id) {
+          const confirmBtn = document.getElementById('confirmDeleteBtn');
+          confirmBtn.onclick = () => deleteTemplate(id);
+          deleteConfirmModal.show();
+      }
+
+      // Видалення шаблону
+      async function deleteTemplate(id) {
+          try {
+              const response = await fetch(`/templates/api/${id}`, {method: 'DELETE'});
+              const result = await response.json();
+
+              deleteConfirmModal.hide();
+
+              if (response.ok) {
+                  showAlert(result.message, 'success');
+                  document.getElementById(`template-card-${id}`).remove();
+              } else {
+                  showAlert(result.error, 'danger');
+              }
+          } catch (error) {
+              showAlert('Сталася мережева помилка.', 'danger');
+          }
+      }
+
+      // Попередній перегляд
+      let currentPreviewTemplateId = null;
+
+      function openPreviewModal(templateId) {
+          currentPreviewTemplateId = templateId;
+          fetchPreview();
+          previewModal.show();
+      }
+
+      document.getElementById('employeeSelect').addEventListener('change', fetchPreview);
+
+      async function fetchPreview() {
+          if (!currentPreviewTemplateId) return;
+
+          const employeeId = document.getElementById('employeeSelect').value;
+          try {
+              const response = await fetch(`/templates/api/${currentPreviewTemplateId}/preview`, {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({employee_id: employeeId})
+              });
+              const result = await response.json();
+
+              if (response.ok) {
+                  document.getElementById('previewSubject').textContent = result.preview.subject;
+                  document.getElementById('previewBody').textContent = result.preview.body;
+              } else {
+                  showAlert(result.error, 'danger');
+              }
+          } catch (error) {
+              showAlert('Сталася мережева помилка.', 'danger');
+          }
+      }
+  </script>
+{% endblock %}

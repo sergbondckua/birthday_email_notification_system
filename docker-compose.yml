@@ -59,7 +59,7 @@ services:
       - bdaygo-network
 
   flower:
-    image: mher/flower
+    build: .
     container_name: bdaygo_flower
     restart: always
     command: celery -A celery_worker.celery flower --port=5555 --url_prefix=/
@@ -69,6 +69,8 @@ services:
       - .env
     depends_on:
       - redis
+    volumes:
+      - .:/usr/src/project
     networks:
       - bdaygo-network
       - proxy-global-network

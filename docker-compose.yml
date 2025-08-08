@@ -17,7 +17,10 @@ services:
       - ./static:/usr/src/project/static
     networks:
       - bdaygo-network
-#      - proxy-global-network  # Підключення до глобальної мережі
+      - proxy-global-network
+    environment:
+      - VIRTUAL_HOST=bday.pp.ua
+      - VIRTUAL_PORT=5000
 
   redis:
     image: redis:alpine
@@ -55,14 +58,32 @@ services:
     networks:
       - bdaygo-network
 
+  flower:
+    image: mher/flower
+    container_name: bdaygo_flower
+    restart: always
+    command: celery -A celery_worker.celery flower --port=5555 --url_prefix=/
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    networks:
+      - bdaygo-network
+      - proxy-global-network
+    environment:
+      - VIRTUAL_HOST=flower.bday.pp.ua
+      - VIRTUAL_PORT=5555
+
 networks:
   bdaygo-network:
     driver: bridge
     ipam:
       config:
         - subnet: 192.168.55.0/24
-#    proxy-global-network:
-#      external: true
+  proxy-global-network:
+    external: true
 
 volumes:
   redis_data:

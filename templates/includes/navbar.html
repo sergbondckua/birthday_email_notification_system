@@ -15,13 +15,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint == 'employees.get_employees' else '' }}"
+                    <a class="nav-link {{ 'active' if request.endpoint == 'employees.employees_page' else '' }}"
                        href="{{ url_for('employees.employees_page') if url_for else '/employees/' }}">
                         <i class="fas fa-users me-1"></i>Співробітники
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint == 'templates.get_templates' else '' }}"
+                    <a class="nav-link {{ 'active' if request.endpoint == 'templates.templates_page' else '' }}"
                        href="{{ url_for('templates.templates_page') if url_for else '/templates/' }}">
                         <i class="fas fa-file-alt me-1"></i>Шаблони
                     </a>
@@ -33,8 +33,8 @@
                     </a>
                 </li>
               <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint == 'auth.profile' else '' }}"
-                       href="{{ url_for('auth.profile_api') if url_for else '/profile/' }}">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'auth.profile_page' else '' }}"
+                       href="{{ url_for('auth.profile_page') if url_for else '/auth/profile/' }}">
                         <i class="fas fa-file-alt me-1"></i>Профіль
                     </a>
                 </li>

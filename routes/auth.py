@@ -68,7 +68,7 @@ def profile_page():
     return render_template("profile.html")
 
 
-@auth_bp.route("/profile", methods=["POST"])
+@auth_bp.route("/api/profile", methods=["GET"])
 @login_required
 def profile_api():
     """API endpoint для отримання інформації про поточного користувача"""

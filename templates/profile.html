@@ -5,13 +5,13 @@
 {% block extra_css %}{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col">
-        <h1 class="display-4 section-title">
-            <i class="fas fa-user-circle me-3"></i>Профіль користувача
-        </h1>
-    </div>
-</div>
+{#<div class="row mb-4">#}
+{#    <div class="col">#}
+{#        <h1 class="display-4 section-title">#}
+{#            <i class="fas fa-user-circle me-3"></i>Профіль користувача#}
+{#        </h1>#}
+{#    </div>#}
+{#</div>#}
 
 <!-- Профіль користувача -->
 <div class="row mb-5">
@@ -206,7 +206,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                <button type="button" class="btn btn-profile" onclick="registerAdmin()">
+                <button type="button" class="btn btn-success" onclick="registerAdmin()">
                     <i class="fas fa-user-plus me-2"></i>Створити
                 </button>
             </div>

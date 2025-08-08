@@ -330,7 +330,7 @@
                 <span
                     class="badge {% if item['days_until'] == 0 %}badge-today{% elif item['days_until'] < 7 %}badge-warning{% else %}badge-success{% endif %}">
                             {% if item['birthday_date'] %}
-                              {{ item['birthday_date'].strftime('%d %B') }}
+                              {{ item['birthday_date'].strftime('%d %B') }} ({{ item['days_until'] }} днів)
                             {% else %}
                               Невідомо
                             {% endif %}

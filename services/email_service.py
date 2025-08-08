@@ -66,7 +66,8 @@ class EmailService:
     def format_template(template_text: str, employee: Employee) -> str:
         """Форматування шаблону з плейсхолдерами"""
         formatted_text = template_text.replace("{name}", employee.full_name)
-        formatted_date = employee.birth_date.strftime("%d.%m.%Y")
+        dob: date = employee.birth_date.replace(year=date.today().year)
+        formatted_date = dob.strftime("%d.%m.%Y")
         formatted_text = formatted_text.replace("{date}", formatted_date)
         return formatted_text
 

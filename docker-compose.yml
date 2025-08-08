@@ -25,8 +25,6 @@ services:
   redis:
     image: redis:alpine
     container_name: bdaygo_redis
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:

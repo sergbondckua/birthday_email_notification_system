@@ -118,8 +118,9 @@ def get_stats():
                 "total_recipients": int(total_recipients),
                 "success_rate": success_rate,
             },
+            # ВИПРАВЛЕНО: Видалено .isoformat(), оскільки stat.date вже є рядком
             "daily_stats": [
-                {"date": stat.date.isoformat(), "emails_sent": stat.count}
+                {"date": stat.date, "emails_sent": stat.count}
                 for stat in daily_stats
             ],
         }), 200

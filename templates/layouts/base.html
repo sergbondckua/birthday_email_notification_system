@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}BirthdayGo{% endblock %} - BirthdayGo</title>
+  <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='35' width='80' height='55' rx='5' fill='%236366f1'/><rect x='42' y='10' width='16' height='80' fill='%238b5cf6'/><rect x='10' y='52' width='80' height='16' fill='%238b5cf6'/><path d='M 42 25 C 22 25 22 10 42 10 L 42 25 Z' fill='%238b5cf6'/><path d='M 58 25 C 78 25 78 10 58 10 L 58 25 Z' fill='%238b5cf6'/></svg>">
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-<!-- Custom CSS -->
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   {% block extra_css %}{% endblock %}
 

@@ -5,525 +5,529 @@
 {% block extra_css %}{% endblock %}
 
 {% block content %}
-{#<div class="row mb-4">#}
-{#    <div class="col">#}
-{#        <h2 class="section-title mb-0">#}
-{#            <i class="fas fa-users me-3"></i>Співробітники#}
-{#        </h2>#}
-{#    </div>#}
-{#</div>#}
+  {#<div class="row mb-4">#}
+  {#    <div class="col">#}
+  {#        <h2 class="section-title mb-0">#}
+  {#            <i class="fas fa-users me-3"></i>Співробітники#}
+  {#        </h2>#}
+  {#    </div>#}
+  {#</div>#}
 
-<!-- Панель управління -->
-<div class="row mb-4">
+  <!-- Панель управління -->
+  <div class="row mb-4">
     <div class="col-md-6">
-        <div class="input-group">
+      <div class="input-group">
             <span class="input-group-text bg-white border-end-0">
                 <i class="fas fa-search text-muted"></i>
             </span>
-            <input type="text" class="form-control search-box border-start-0" id="searchInput"
-                   placeholder="Пошук співробітників..." value="{{ request.args.get('search', '') }}">
-        </div>
+        <input type="text" class="form-control search-box border-start-0" id="searchInput"
+               placeholder="Пошук співробітників..." value="{{ request.args.get('search', '') }}">
+      </div>
     </div>
     <div class="col-md-6 text-end">
-        <button class="btn btn-gradient me-2" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-            <i class="fas fa-plus me-2"></i>Додати співробітника
-        </button>
-        <button class="btn btn-success-gradient" data-bs-toggle="modal" data-bs-target="#importModal">
-            <i class="fas fa-file-import me-2"></i>Імпорт CSV
-        </button>
+      <button class="btn btn-gradient me-2" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+        <i class="fas fa-plus me-2"></i>Додати співробітника
+      </button>
+      <button class="btn btn-success-gradient" data-bs-toggle="modal" data-bs-target="#importModal">
+        <i class="fas fa-file-import me-2"></i>Імпорт CSV, XLSX
+      </button>
     </div>
-</div>
+  </div>
 
-<!-- Статистика -->
-<div class="row mb-4">
+  <!-- Статистика -->
+  <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body text-center p-3">
-                <h5 class="text-muted mb-1">Всього співробітників</h5>
-                <h3 class="fw-bold text-dark" id="totalEmployees">{{ employees.total if employees else 0 }}</h3>
-            </div>
+      <div class="card stat-card">
+        <div class="card-body text-center p-3">
+          <h5 class="text-muted mb-1">Всього співробітників</h5>
+          <h3 class="fw-bold text-dark" id="totalEmployees">{{ employees.total if employees else 0 }}</h3>
         </div>
+      </div>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body text-center p-3">
-                <h5 class="text-muted mb-1">Поточна сторінка</h5>
-                <h3 class="fw-bold text-dark">{{ employees.page if employees else 1 }}</h3>
-            </div>
+      <div class="card stat-card">
+        <div class="card-body text-center p-3">
+          <h5 class="text-muted mb-1">Поточна сторінка</h5>
+          <h3 class="fw-bold text-dark">{{ employees.page if employees else 1 }}</h3>
         </div>
+      </div>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body text-center p-3">
-                <h5 class="text-muted mb-1">Всього сторінок</h5>
-                <h3 class="fw-bold text-dark">{{ employees.pages if employees else 1 }}</h3>
-            </div>
+      <div class="card stat-card">
+        <div class="card-body text-center p-3">
+          <h5 class="text-muted mb-1">Всього сторінок</h5>
+          <h3 class="fw-bold text-dark">{{ employees.pages if employees else 1 }}</h3>
         </div>
+      </div>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body text-center p-3">
-                <h5 class="text-muted mb-1">На сторінці</h5>
-                <h3 class="fw-bold text-dark">{{ employees.items|length if employees else 0 }}</h3>
-            </div>
+      <div class="card stat-card">
+        <div class="card-body text-center p-3">
+          <h5 class="text-muted mb-1">На сторінці</h5>
+          <h3 class="fw-bold text-dark">{{ employees.items|length if employees else 0 }}</h3>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Список співробітників -->
-<div class="row" id="employeesList">
+  <!-- Список співробітників -->
+  <div class="row" id="employeesList">
     {% if employees and employees.items %}
-        {% for employee in employees.items %}
+      {% for employee in employees.items %}
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card employee-card h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="employee-avatar-large me-3">
-                            {{ employee.first_name[0] }}{{ employee.last_name[0] }}
-                        </div>
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1 fw-bold">{{ employee.full_name }}</h5>
-                            <p class="text-muted mb-0 small">
-                                <i class="fas fa-envelope me-1"></i>{{ employee.email }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <small class="text-muted">
-                            <i class="fas fa-birthday-cake me-1"></i>
-                            {{ employee.birth_date.strftime('%d.%m.%Y') }}
-                        </small>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary btn-sm flex-fill"
-                                onclick="editEmployee({{ employee.id }}, '{{ employee.first_name }}', '{{ employee.last_name }}', '{{ employee.email }}', '{{ employee.birth_date.strftime('%d.%m.%Y') }}')">
-                            <i class="fas fa-edit me-1"></i>Редагувати
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm"
-                                onclick="deleteEmployee({{ employee.id }}, '{{ employee.full_name }}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+          <div class="card employee-card h-100">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-3">
+                <div class="employee-avatar-large me-3">
+                  {{ employee.first_name[0] }}{{ employee.last_name[0] }}
                 </div>
+                <div class="flex-grow-1">
+                  <h5 class="mb-1 fw-bold">{{ employee.full_name }}</h5>
+                  <p class="text-muted mb-0 small">
+                    <i class="fas fa-envelope me-1"></i>{{ employee.email }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <small class="text-muted">
+                  <i class="fas fa-birthday-cake me-1"></i>
+                  {{ employee.birth_date.strftime('%d.%m.%Y') }}
+                </small>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm flex-fill"
+                        onclick="editEmployee({{ employee.id }}, '{{ employee.first_name }}', '{{ employee.last_name }}', '{{ employee.email }}', '{{ employee.birth_date.strftime('%d.%m.%Y') }}')">
+                  <i class="fas fa-edit me-1"></i>Редагувати
+                </button>
+                <button class="btn btn-outline-danger btn-sm"
+                        onclick="deleteEmployee({{ employee.id }}, '{{ employee.full_name }}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             </div>
+          </div>
         </div>
-        {% endfor %}
+      {% endfor %}
     {% else %}
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">Співробітники не знайдені</h4>
-                    <p class="text-muted">Додайте першого співробітника або змініть параметри пошуку</p>
-                    <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-                        <i class="fas fa-plus me-2"></i>Додати співробітника
-                    </button>
-                </div>
-            </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">Співробітники не знайдені</h4>
+            <p class="text-muted">Додайте першого співробітника або змініть параметри пошуку</p>
+            <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+              <i class="fas fa-plus me-2"></i>Додати співробітника
+            </button>
+          </div>
         </div>
+      </div>
     {% endif %}
-</div>
+  </div>
 
-<!-- Пагінація -->
-{% if employees and employees.pages > 1 %}
-<div class="row mt-4">
-    <div class="col-12 d-flex justify-content-center">
+  <!-- Пагінація -->
+  {% if employees and employees.pages > 1 %}
+    <div class="row mt-4">
+      <div class="col-12 d-flex justify-content-center">
         <nav aria-label="Пагінація співробітників">
-            <ul class="pagination">
-                {% if employees.has_prev %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ url_for('employees.get_employees', page=employees.prev_num, search=request.args.get('search', '')) }}">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                {% endif %}
+          <ul class="pagination">
+            {% if employees.has_prev %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('employees.get_employees', page=employees.prev_num, search=request.args.get('search', '')) }}">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              </li>
+            {% endif %}
 
-                {% for page_num in employees.iter_pages() %}
-                    {% if page_num %}
-                        {% if page_num != employees.page %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ url_for('employees.get_employees', page=page_num, search=request.args.get('search', '')) }}">
-                                    {{ page_num }}
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ page_num }}</span>
-                            </li>
-                        {% endif %}
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">…</span>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if employees.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ url_for('employees.get_employees', page=employees.next_num, search=request.args.get('search', '')) }}">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
+            {% for page_num in employees.iter_pages() %}
+              {% if page_num %}
+                {% if page_num != employees.page %}
+                  <li class="page-item">
+                    <a class="page-link"
+                       href="{{ url_for('employees.get_employees', page=page_num, search=request.args.get('search', '')) }}">
+                      {{ page_num }}
+                    </a>
+                  </li>
+                {% else %}
+                  <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                  </li>
                 {% endif %}
-            </ul>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link">…</span>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if employees.has_next %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('employees.get_employees', page=employees.next_num, search=request.args.get('search', '')) }}">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
         </nav>
+      </div>
     </div>
-</div>
-{% endif %}
+  {% endif %}
 
-<!-- Модальне вікно додавання співробітника -->
-<div class="modal fade" id="addEmployeeModal" tabindex="-1">
+  <!-- Модальне вікно додавання співробітника -->
+  <div class="modal fade" id="addEmployeeModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-user-plus me-2"></i>Додати співробітника
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addEmployeeForm">
-                    <div class="mb-3">
-                        <label for="firstName" class="form-label">Ім'я</label>
-                        <input type="text" class="form-control" id="firstName" name="first_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="lastName" class="form-label">Прізвище</label>
-                        <input type="text" class="form-control" id="lastName" name="last_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="birthDate" class="form-label">Дата народження</label>
-                        <input type="text" class="form-control" id="birthDate" name="birth_date"
-                               placeholder="ДД.ММ.РРРР" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                <button type="button" class="btn btn-gradient" onclick="saveEmployee()">
-                    <i class="fas fa-save me-2"></i>Зберегти
-                </button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-user-plus me-2"></i>Додати співробітника
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
+        <div class="modal-body">
+          <form id="addEmployeeForm">
+            <div class="mb-3">
+              <label for="firstName" class="form-label">Ім'я</label>
+              <input type="text" class="form-control" id="firstName" name="first_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="lastName" class="form-label">Прізвище</label>
+              <input type="text" class="form-control" id="lastName" name="last_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="birthDate" class="form-label">Дата народження</label>
+              <input type="text" class="form-control" id="birthDate" name="birth_date"
+                     placeholder="ДД.ММ.РРРР" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+          <button type="button" class="btn btn-gradient" onclick="saveEmployee()">
+            <i class="fas fa-save me-2"></i>Зберегти
+          </button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Модальне вікно редагування співробітника -->
-<div class="modal fade" id="editEmployeeModal" tabindex="-1">
+  <!-- Модальне вікно редагування співробітника -->
+  <div class="modal fade" id="editEmployeeModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-user-edit me-2"></i>Редагувати співробітника
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editEmployeeForm">
-                    <input type="hidden" id="editEmployeeId">
-                    <div class="mb-3">
-                        <label for="editFirstName" class="form-label">Ім'я</label>
-                        <input type="text" class="form-control" id="editFirstName" name="first_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editLastName" class="form-label">Прізвище</label>
-                        <input type="text" class="form-control" id="editLastName" name="last_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editEmail" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editBirthDate" class="form-label">Дата народження</label>
-                        <input type="text" class="form-control" id="editBirthDate" name="birth_date"
-                               placeholder="ДД.ММ.РРРР" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                <button type="button" class="btn btn-gradient" onclick="updateEmployee()">
-                    <i class="fas fa-save me-2"></i>Оновити
-                </button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-user-edit me-2"></i>Редагувати співробітника
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
+        <div class="modal-body">
+          <form id="editEmployeeForm">
+            <input type="hidden" id="editEmployeeId">
+            <div class="mb-3">
+              <label for="editFirstName" class="form-label">Ім'я</label>
+              <input type="text" class="form-control" id="editFirstName" name="first_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="editLastName" class="form-label">Прізвище</label>
+              <input type="text" class="form-control" id="editLastName" name="last_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="editEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="editEmail" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="editBirthDate" class="form-label">Дата народження</label>
+              <input type="text" class="form-control" id="editBirthDate" name="birth_date"
+                     placeholder="ДД.ММ.РРРР" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+          <button type="button" class="btn btn-gradient" onclick="updateEmployee()">
+            <i class="fas fa-save me-2"></i>Оновити
+          </button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Модальне вікно імпорту -->
-<div class="modal fade" id="importModal" tabindex="-1">
+  <!-- Модальне вікно імпорту -->
+  <div class="modal fade" id="importModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-file-import me-2"></i>Імпорт співробітників з CSV
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Формат CSV файлу:</strong> first_name, last_name, email, birth_date (ДД.ММ.РРРР)
-                </div>
-
-                <div class="import-drop-zone text-center p-5" id="dropZone">
-                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                    <h5>Перетягніть CSV файл сюди</h5>
-                    <p class="text-muted">або натисніть для вибору</p>
-                    <input type="file" id="csvFile" accept=".csv" class="d-none">
-                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('csvFile').click()">
-                        <i class="fas fa-folder-open me-2"></i>Вибрати файл
-                    </button>
-                </div>
-
-                <div id="importProgress" class="mt-3 d-none">
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated"
-                             role="progressbar" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <div id="importResults" class="mt-3"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
-                <button type="button" class="btn btn-success-gradient" onclick="uploadCSV()" id="uploadBtn" disabled>
-                    <i class="fas fa-upload me-2"></i>Завантажити
-                </button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-file-import me-2"></i>Імпорт співробітників з CSV, Excel (.xlsx, .xls)
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-    </div>
-</div>
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Формат CSV, Excel файлу:</strong> <code>first_name,last_name,email,birth_date</code> (ДД.ММ.РРРР)
+          </div>
 
-<!-- Toast для повідомлень -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
+          <div class="import-drop-zone text-center p-5" id="dropZone">
+            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+            <h5>Перетягніть CSV, Excel файл сюди</h5>
+            <p class="text-muted"><i class="fa-solid fa-file-csv fa-2x text-warning"></i> <i class="fa-solid fa-file-excel fa-2x text-success"></i></p>
+            <p class="text-muted">або натисніть для вибору</p>
+            <input type="file" id="csvFile" accept=".csv, .xlsx, .xls" class="d-none">
+            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('csvFile').click()">
+              <i class="fas fa-folder-open me-2"></i>Вибрати файл
+            </button>
+          </div>
+
+          <div id="importProgress" class="mt-3 d-none">
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated"
+                   role="progressbar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div id="importResults" class="mt-3"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+          <button type="button" class="btn btn-success-gradient" onclick="uploadCSV()" id="uploadBtn" disabled>
+            <i class="fas fa-upload me-2"></i>Завантажити
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast для повідомлень -->
+  <div class="toast-container position-fixed top-0 end-0 p-3">
     <div id="toast" class="toast" role="alert">
-        <div class="toast-header">
-            <i class="fas fa-info-circle me-2 text-primary"></i>
-            <strong class="me-auto">BirthdayApp</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body" id="toastMessage"></div>
+      <div class="toast-header">
+        <i class="fas fa-info-circle me-2 text-primary"></i>
+        <strong class="me-auto">BirthdayApp</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+      </div>
+      <div class="toast-body" id="toastMessage"></div>
     </div>
-</div>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Пошук співробітників
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value;
-        const url = new URL(window.location);
-        if (searchTerm) {
-            url.searchParams.set('search', searchTerm);
-        } else {
-            url.searchParams.delete('search');
-        }
-        url.searchParams.set('page', '1');
-        window.location.href = url.toString();
-    });
+  <script>
+      // Пошук співробітників
+      document.getElementById('searchInput').addEventListener('input', function (e) {
+          const searchTerm = e.target.value;
+          const url = new URL(window.location);
+          if (searchTerm) {
+              url.searchParams.set('search', searchTerm);
+          } else {
+              url.searchParams.delete('search');
+          }
+          url.searchParams.set('page', '1');
+          window.location.href = url.toString();
+      });
 
-    // Показати toast повідомлення
-    function showToast(message, type = 'info') {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
-        const toastIcon = toast.querySelector('i');
+      // Показати toast повідомлення
+      function showToast(message, type = 'info') {
+          const toast = document.getElementById('toast');
+          const toastMessage = document.getElementById('toastMessage');
+          const toastIcon = toast.querySelector('i');
 
-        toastMessage.textContent = message;
+          toastMessage.textContent = message;
 
-        // Змінити іконку залежно від типу
-        toastIcon.className = `fas me-2 ${
-            type === 'success' ? 'fa-check-circle text-success' :
-            type === 'error' ? 'fa-exclamation-circle text-danger' :
-            type === 'warning' ? 'fa-exclamation-triangle text-warning' :
-            'fa-info-circle text-primary'
-        }`;
+          // Змінити іконку залежно від типу
+          toastIcon.className = `fas me-2 ${
+              type === 'success' ? 'fa-check-circle text-success' :
+                  type === 'error' ? 'fa-exclamation-circle text-danger' :
+                      type === 'warning' ? 'fa-exclamation-triangle text-warning' :
+                          'fa-info-circle text-primary'
+          }`;
 
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-    }
+          const bsToast = new bootstrap.Toast(toast);
+          bsToast.show();
+      }
 
-    // Зберегти нового співробітника
-    function saveEmployee() {
-        const form = document.getElementById('addEmployeeForm');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
+      // Зберегти нового співробітника
+      function saveEmployee() {
+          const form = document.getElementById('addEmployeeForm');
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData);
 
-        fetch('/employees/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showToast(data.error, 'error');
-            } else if (data.errors) {
-                showToast(data.errors.join(', '), 'error');
-            } else {
-                showToast(data.message, 'success');
-                bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal')).hide();
-                location.reload();
-            }
-        })
-        .catch(error => {
-            showToast('Помилка мережі: ' + error.message, 'error');
-        });
-    }
+          fetch('/employees/', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data)
+          })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.error) {
+                      showToast(data.error, 'error');
+                  } else if (data.errors) {
+                      showToast(data.errors.join(', '), 'error');
+                  } else {
+                      showToast(data.message, 'success');
+                      bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal')).hide();
+                      location.reload();
+                  }
+              })
+              .catch(error => {
+                  showToast('Помилка мережі: ' + error.message, 'error');
+              });
+      }
 
-    // Редагувати співробітника
-    function editEmployee(id, firstName, lastName, email, birthDate) {
-        document.getElementById('editEmployeeId').value = id;
-        document.getElementById('editFirstName').value = firstName;
-        document.getElementById('editLastName').value = lastName;
-        document.getElementById('editEmail').value = email;
-        document.getElementById('editBirthDate').value = birthDate;
+      // Редагувати співробітника
+      function editEmployee(id, firstName, lastName, email, birthDate) {
+          document.getElementById('editEmployeeId').value = id;
+          document.getElementById('editFirstName').value = firstName;
+          document.getElementById('editLastName').value = lastName;
+          document.getElementById('editEmail').value = email;
+          document.getElementById('editBirthDate').value = birthDate;
 
-        const modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
-        modal.show();
-    }
+          const modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
+          modal.show();
+      }
 
-    // Оновити співробітника
-    function updateEmployee() {
-        const form = document.getElementById('editEmployeeForm');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        const employeeId = document.getElementById('editEmployeeId').value;
+      // Оновити співробітника
+      function updateEmployee() {
+          const form = document.getElementById('editEmployeeForm');
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData);
+          const employeeId = document.getElementById('editEmployeeId').value;
 
-        fetch(`/employees/${employeeId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showToast(data.error, 'error');
-            } else if (data.errors) {
-                showToast(data.errors.join(', '), 'error');
-            } else {
-                showToast(data.message, 'success');
-                bootstrap.Modal.getInstance(document.getElementById('editEmployeeModal')).hide();
-                location.reload();
-            }
-        })
-        .catch(error => {
-            showToast('Помилка мережі: ' + error.message, 'error');
-        });
-    }
+          fetch(`/employees/${employeeId}`, {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data)
+          })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.error) {
+                      showToast(data.error, 'error');
+                  } else if (data.errors) {
+                      showToast(data.errors.join(', '), 'error');
+                  } else {
+                      showToast(data.message, 'success');
+                      bootstrap.Modal.getInstance(document.getElementById('editEmployeeModal')).hide();
+                      location.reload();
+                  }
+              })
+              .catch(error => {
+                  showToast('Помилка мережі: ' + error.message, 'error');
+              });
+      }
 
-    // Видалити співробітника
-    function deleteEmployee(id, name) {
-        if (confirm(`Ви впевнені, що хочете видалити співробітника "${name}"?`)) {
-            fetch(`/employees/${id}`, {
-                method: 'DELETE'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    showToast(data.error, 'error');
-                } else {
-                    showToast(data.message, 'success');
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                showToast('Помилка мережі: ' + error.message, 'error');
-            });
-        }
-    }
+      // Видалити співробітника
+      function deleteEmployee(id, name) {
+          if (confirm(`Ви впевнені, що хочете видалити співробітника "${name}"?`)) {
+              fetch(`/employees/${id}`, {
+                  method: 'DELETE'
+              })
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.error) {
+                          showToast(data.error, 'error');
+                      } else {
+                          showToast(data.message, 'success');
+                          location.reload();
+                      }
+                  })
+                  .catch(error => {
+                      showToast('Помилка мережі: ' + error.message, 'error');
+                  });
+          }
+      }
 
-    // Імпорт CSV
-    let selectedFile = null;
+      // Імпорт CSV
+      let selectedFile = null;
 
-    document.getElementById('csvFile').addEventListener('change', function(e) {
-        selectedFile = e.target.files[0];
-        if (selectedFile) {
-            document.getElementById('uploadBtn').disabled = false;
-            document.querySelector('#dropZone h5').textContent = `Вибрано: ${selectedFile.name}`;
-        }
-    });
+      document.getElementById('csvFile').addEventListener('change', function (e) {
+          selectedFile = e.target.files[0];
+          if (selectedFile) {
+              document.getElementById('uploadBtn').disabled = false;
+              document.querySelector('#dropZone h5').textContent = `Вибрано: ${selectedFile.name}`;
+          }
+      });
 
-    // Drag & Drop для CSV
-    const dropZone = document.getElementById('dropZone');
+      // Drag & Drop для CSV
+      const dropZone = document.getElementById('dropZone');
 
-    dropZone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-    });
+      dropZone.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          dropZone.classList.add('dragover');
+      });
 
-    dropZone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-    });
+      dropZone.addEventListener('dragleave', function (e) {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
+      });
 
-    dropZone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
+      dropZone.addEventListener('drop', function (e) {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
 
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            selectedFile = files[0];
-            document.getElementById('uploadBtn').disabled = false;
-            document.querySelector('#dropZone h5').textContent = `Вибрано: ${selectedFile.name}`;
-        }
-    });
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+              selectedFile = files[0];
+              document.getElementById('uploadBtn').disabled = false;
+              document.querySelector('#dropZone h5').textContent = `Вибрано: ${selectedFile.name}`;
+          }
+      });
 
-    function uploadCSV() {
-        if (!selectedFile) return;
+      function uploadCSV() {
+          if (!selectedFile) return;
 
-        const formData = new FormData();
-        formData.append('file', selectedFile);
+          const formData = new FormData();
+          formData.append('file', selectedFile);
 
-        // Показати прогрес
-        document.getElementById('importProgress').classList.remove('d-none');
-        const progressBar = document.querySelector('.progress-bar');
-        progressBar.style.width = '50%';
+          // Показати прогрес
+          document.getElementById('importProgress').classList.remove('d-none');
+          const progressBar = document.querySelector('.progress-bar');
+          progressBar.style.width = '50%';
 
-        fetch('/employees/import', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            progressBar.style.width = '100%';
+          fetch('/employees/import', {
+              method: 'POST',
+              body: formData
+          })
+              .then(response => response.json())
+              .then(data => {
+                  progressBar.style.width = '100%';
 
-            const resultsDiv = document.getElementById('importResults');
-            let html = `<div class="alert alert-${data.error ? 'danger' : 'success'}">`;
+                  const resultsDiv = document.getElementById('importResults');
+                  let html = `<div class="alert alert-${data.error ? 'danger' : 'success'}">`;
 
-            if (data.error) {
-                html += `<i class="fas fa-exclamation-circle me-2"></i>${data.error}`;
-            } else {
-                html += `<i class="fas fa-check-circle me-2"></i>${data.message}`;
-                if (data.errors && data.errors.length > 0) {
-                    html += '<hr><strong>Помилки:</strong><ul class="mb-0">';
-                    data.errors.forEach(error => {
-                        html += `<li>${error}</li>`;
-                    });
-                    html += '</ul>';
-                }
-            }
+                  if (data.error) {
+                      html += `<i class="fas fa-exclamation-circle me-2"></i>${data.error}`;
+                  } else {
+                      html += `<i class="fas fa-check-circle me-2"></i>${data.message}`;
+                      if (data.errors && data.errors.length > 0) {
+                          html += '<hr><strong>Помилки:</strong><ul class="mb-0">';
+                          data.errors.forEach(error => {
+                              html += `<li>${error}</li>`;
+                          });
+                          html += '</ul>';
+                      }
+                  }
 
-            html += '</div>';
-            resultsDiv.innerHTML = html;
+                  html += '</div>';
+                  resultsDiv.innerHTML = html;
 
-            if (!data.error && data.created_count > 0) {
-                setTimeout(() => location.reload(), 2000);
-            }
-        })
-        .catch(error => {
-            showToast('Помилка завантаження: ' + error.message, 'error');
-        });
-    }
-</script>
+                  if (!data.error && data.created_count > 0) {
+                      setTimeout(() => location.reload(), 2000);
+                  }
+              })
+              .catch(error => {
+                  showToast('Помилка завантаження: ' + error.message, 'error');
+              });
+      }
+  </script>
 {% endblock %}

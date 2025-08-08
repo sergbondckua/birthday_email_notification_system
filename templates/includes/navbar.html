@@ -11,36 +11,36 @@
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'dashboard.dashboard' else '' }}"
                        href="{{ url_for('dashboard.dashboard') if url_for else '/' }}">
-                        <i class="fas fa-tachometer-alt me-1"></i>Дашборд
+                        <i class="fas fa-tachometer-alt me-1"></i> Дашборд
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'employees.employees_page' else '' }}"
                        href="{{ url_for('employees.employees_page') if url_for else '/employees/' }}">
-                        <i class="fas fa-users me-1"></i>Співробітники
+                        <i class="fas fa-users me-1"></i> Співробітники
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'templates.templates_page' else '' }}"
                        href="{{ url_for('templates.templates_page') if url_for else '/templates/' }}">
-                        <i class="fas fa-file-alt me-1"></i>Шаблони
+                        <i class="fa-brands fa-dochub"></i> Шаблони
                     </a>
                 </li>
               <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'logs.logs_page' else '' }}"
                        href="{{ url_for('logs.logs_page') if url_for else '/logs/' }}">
-                        <i class="fas fa-file-alt me-1"></i>Логи
+                        <i class="fa-solid fa-gears"></i> Логи
                     </a>
                 </li>
               <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'auth.profile_page' else '' }}"
                        href="{{ url_for('auth.profile_page') if url_for else '/auth/profile/' }}">
-                        <i class="fas fa-file-alt me-1"></i>Профіль
+                        <i class="fa-solid fa-address-card"></i> Профіль
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-danger" href="{{ url_for('auth.logout_page') if url_for else '/logout/' }}">
-                        <i class="fas fa-sign-out-alt me-1"></i>Вихід
+                        <i class="fas fa-sign-out-alt me-1"></i> Вихід
                     </a>
                 </li>
             </ul>

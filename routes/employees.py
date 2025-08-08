@@ -269,22 +269,137 @@ def import_employees():
         if file.filename == "":
             return jsonify({"error": "Файл не вибрано"}), 400
 
-        # Читання CSV
-        if not file.filename.lower().endswith(".csv"):
-            return jsonify({"error": "Підтримуються тільки CSV файли"}), 400
-
-        stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
-        csv_input = csv.DictReader(stream, delimiter=",")
+        # Перевірка розширення файлу
+        filename = file.filename.lower()
+        if not (
+            filename.endswith(".csv")
+            or filename.endswith(".xlsx")
+            or filename.endswith(".xls")
+        ):
+            return (
+                jsonify({"error": "Підтримуються тільки CSV та Excel файли"}),
+                400,
+            )
 
         created_count = 0
         errors = []
 
+        try:
+            # Читання файлу в залежності від типу
+            if filename.endswith(".csv"):
+                # Читання CSV з правильним кодуванням
+                content = file.stream.read()
+
+                # Спроба визначити кодування
+                try:
+                    decoded_content = content.decode("utf-8")
+                except UnicodeDecodeError:
+                    try:
+                        decoded_content = content.decode(
+                            "cp1251"
+                        )  # Windows кодування
+                    except UnicodeDecodeError:
+                        decoded_content = content.decode(
+                            "utf-8", errors="replace"
+                        )
+
+                stream = io.StringIO(decoded_content)
+
+                # Спроба визначити роздільник
+                sample = decoded_content[:1024]
+                sniffer = csv.Sniffer()
+                try:
+                    delimiter = sniffer.sniff(sample).delimiter
+                except:
+                    delimiter = ","
+
+                csv_input = csv.DictReader(stream, delimiter=delimiter)
+
+            else:  # Excel файли
+                import pandas as pd
+
+                df = pd.read_excel(file.stream)
+                csv_input = df.to_dict("records")
+
+        except Exception as e:
+            return jsonify({"error": f"Помилка читання файлу: {str(e)}"}), 400
+
+        # Валідація заголовків
+        required_columns = ["first_name", "last_name", "email", "birth_date"]
+
+        if filename.endswith(".csv"):
+            # Для CSV перевіряємо fieldnames
+            if not csv_input.fieldnames:
+                return (
+                    jsonify({"error": "Файл порожній або не має заголовків"}),
+                    400,
+                )
+
+            actual_columns = [
+                col.strip().lower() for col in csv_input.fieldnames if col
+            ]
+
+            missing_columns = [
+                col for col in required_columns if col not in actual_columns
+            ]
+
+            if missing_columns:
+                return (
+                    jsonify(
+                        {
+                            "error": f"Відсутні обов'язкові колонки: {', '.join(missing_columns)}"
+                        }
+                    ),
+                    400,
+                )
+        else:
+            # Для Excel перевіряємо перший рядок
+            if not csv_input:
+                return jsonify({"error": "Файл порожній"}), 400
+
+            actual_columns = [
+                col.strip().lower() for col in csv_input[0].keys() if col
+            ]
+            missing_columns = [
+                col for col in required_columns if col not in actual_columns
+            ]
+
+            if missing_columns:
+                return (
+                    jsonify(
+                        {
+                            "error": f"Відсутні обов'язкові колонки: {', '.join(missing_columns)}"
+                        }
+                    ),
+                    400,
+                )
+
+        # Обробка рядків
+        employees_to_add = []
+        existing_emails = set()
+
+        # Отримуємо всі існуючі emails одним запитом для оптимізації
+        all_existing_emails = {
+            emp.email for emp in db.session.query(Employee.email).all()
+        }
+
         for row_num, row in enumerate(csv_input, start=2):
             try:
-                first_name = row.get("first_name", "").strip()
-                last_name = row.get("last_name", "").strip()
-                email = row.get("email", "").strip().lower()
-                birth_date = row.get("birth_date", "").strip()
+                # Нормалізація ключів для випадку з різними регістрами
+                normalized_row = {
+                    k.strip().lower(): v
+                    for k, v in row.items()
+                    if k is not None
+                }
+
+                first_name = str(normalized_row.get("first_name", "")).strip()
+                last_name = str(normalized_row.get("last_name", "")).strip()
+                email = str(normalized_row.get("email", "")).strip().lower()
+                birth_date = str(normalized_row.get("birth_date", "")).strip()
+
+                # Пропуск порожніх рядків
+                if not any([first_name, last_name, email, birth_date]):
+                    continue
 
                 # Валідація рядка
                 row_errors = Validators.validate_employee_data(
@@ -294,8 +409,8 @@ def import_employees():
                     errors.append(f"Рядок {row_num}: {', '.join(row_errors)}")
                     continue
 
-                # Перевірка унікальності
-                if Employee.query.filter_by(email=email).first():
+                # Перевірка унікальності (включаючи поточний batch)
+                if email in all_existing_emails or email in existing_emails:
                     errors.append(f"Рядок {row_num}: Email {email} вже існує")
                     continue
 
@@ -309,33 +424,54 @@ def import_employees():
                     )
                     continue
 
-                # Створення співробітника
-                employee = Employee(
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=email,
-                    birth_date=parsed_date,
+                # Додаємо до списку для batch insert
+                employees_to_add.append(
+                    Employee(
+                        first_name=first_name,
+                        last_name=last_name,
+                        email=email,
+                        birth_date=parsed_date,
+                    )
                 )
 
-                db.session.add(employee)
+                existing_emails.add(email)
                 created_count += 1
 
             except Exception as e:
-                errors.append(f"Рядок {row_num}: {str(e)}")
+                errors.append(f"Рядок {row_num}: Помилка обробки - {str(e)}")
 
-        db.session.commit()
+        # Batch insert для кращої продуктивності
+        if employees_to_add:
+            try:
+                db.session.bulk_save_objects(employees_to_add)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return (
+                    jsonify(
+                        {"error": f"Помилка збереження в базу даних: {str(e)}"}
+                    ),
+                    500,
+                )
 
-        return (
-            jsonify(
-                {
-                    "message": f"Імпорт завершено. Створено: {created_count} співробітників",
-                    "created_count": created_count,
-                    "errors": errors,
-                }
-            ),
-            200,
-        )
+        # Підготовка результату
+        result = {
+            "message": f"Імпорт завершено. Створено: {created_count} співробітників",
+            "created_count": created_count,
+            "total_errors": len(errors),
+        }
+
+        # Обмежуємо кількість помилок у відповіді
+        if errors:
+            result["errors"] = errors[:50]  # Показуємо тільки перші 50 помилок
+            if len(errors) > 50:
+                result[
+                    "message"
+                ] += f" (показано перші 50 з {len(errors)} помилок)"
+
+        status_code = 200 if created_count > 0 else 400
+        return jsonify(result), status_code
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": f"Помилка імпорту: {str(e)}"}), 500
+        return jsonify({"error": f"Загальна помилка імпорту: {str(e)}"}), 500

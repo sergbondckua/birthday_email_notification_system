@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -50,6 +51,10 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     app.register_blueprint(logs_bp, url_prefix="/logs")
     app.register_blueprint(settings_bp, url_prefix="/settings")
     app.register_blueprint(dashboard_bp, url_prefix="/")
+
+    @app.context_processor
+    def inject_now():
+        return {"now": datetime.now()}
 
     # Створення таблиць БД
     with app.app_context():

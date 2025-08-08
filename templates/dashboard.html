@@ -1,146 +1,515 @@
-{% extends "layouts/base.html" %}
+{% extends 'layouts/base.html' %}
 
-{% block title %}Дашборд{% endblock %}
+{% block title %}Інформаційна Панель - BirthdayApp{% endblock %}
+
+{% block extra_css %}
+  <style>
+      /* Стилі для календаря */
+      .calendar {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.9rem;
+      }
+
+      .calendar th, .calendar td {
+          text-align: center;
+          padding: 0.75rem 0.5rem;
+          border: 1px solid #e2e8f0;
+      }
+
+      .calendar th {
+          background-color: #f8fafc;
+          font-weight: 600;
+          color: var(--dark-color);
+      }
+
+      .calendar td {
+          height: 80px;
+          vertical-align: top;
+          position: relative;
+      }
+
+      .calendar .day-number {
+          font-size: 0.9rem;
+          font-weight: 500;
+      }
+
+      .calendar .other-month .day-number {
+          color: #9ca3af;
+      }
+
+      .calendar .has-birthday {
+          background-color: #eef2ff;
+          cursor: pointer;
+          transition: background-color 0.3s;
+      }
+
+      .calendar .has-birthday:hover {
+          background-color: #e0e7ff;
+      }
+
+      .calendar .has-birthday .day-number {
+          background-color: var(--primary-color);
+          color: white;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .calendar .today .day-number {
+          border: 2px solid var(--primary-color);
+      }
+
+      /* Мобільні стилі */
+      @media (max-width: 768px) {
+          .stat-card {
+              margin-bottom: 0.75rem !important;
+          }
+
+          .stat-card .card-body {
+              padding: 1rem;
+              flex-direction: column;
+              text-align: center;
+          }
+
+          .stat-card .fas {
+              margin-bottom: 0.5rem;
+              margin-right: 0 !important;
+          }
+
+          .stat-card .display-6 {
+              font-size: 1.5rem;
+          }
+
+          .calendar {
+              font-size: 0.8rem;
+          }
+
+          .calendar th, .calendar td {
+              padding: 0.25rem;
+          }
+
+          .calendar td {
+              height: 50px;
+          }
+
+          .calendar .day-number {
+              font-size: 0.8rem;
+              width: 24px;
+              height: 24px;
+          }
+
+          .upcoming-birthday-item {
+              padding: 0.75rem !important;
+          }
+
+          .employee-avatar {
+              width: 35px;
+              height: 35px;
+              font-size: 0.9rem;
+          }
+
+          .birthday-special-card .fas {
+              font-size: 2rem !important;
+          }
+
+          .birthday-special-card .h5 {
+              font-size: 1rem;
+          }
+      }
+
+      @media (max-width: 576px) {
+          .row.mb-4 {
+              margin-bottom: 1rem !important;
+          }
+
+          .col-md-3 {
+              margin-bottom: 0.5rem;
+          }
+
+          .stat-card .card-body {
+              padding: 0.75rem;
+          }
+
+          .stat-card .display-6 {
+              font-size: 1.25rem;
+          }
+
+          .calendar {
+              font-size: 0.7rem;
+          }
+
+          .calendar th, .calendar td {
+              padding: 0.15rem;
+          }
+
+          .calendar td {
+              height: 40px;
+          }
+
+          .calendar .day-number {
+              font-size: 0.7rem;
+              width: 20px;
+              height: 20px;
+          }
+
+          .upcoming-birthday-item {
+              flex-direction: column;
+              align-items: flex-start !important;
+              gap: 0.5rem;
+          }
+
+          .upcoming-birthday-item .d-flex {
+              width: 100%;
+          }
+
+          .upcoming-birthday-item .badge {
+              align-self: flex-end;
+          }
+
+          .employee-avatar {
+              width: 30px;
+              height: 30px;
+              font-size: 0.8rem;
+              margin-right: 0.5rem;
+          }
+
+          .birthday-special-card {
+              margin-bottom: 1rem !important;
+          }
+
+          .birthday-special-card .fas {
+              font-size: 1.5rem !important;
+              margin-bottom: 0.5rem !important;
+          }
+
+          .birthday-special-card .card-title {
+              font-size: 1.25rem;
+          }
+
+          .calendar-controls {
+              gap: 0.5rem;
+          }
+
+          .calendar-controls button {
+              padding: 0.375rem 0.75rem;
+          }
+
+          #calendarHeader {
+              font-size: 1rem;
+              text-align: center;
+              flex: 1;
+          }
+      }
+
+      /* Додаткові стилі для покращення UX */
+      .employee-avatar {
+          background-color: var(--primary-color);
+          color: white;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          margin-right: 1rem;
+          flex-shrink: 0;
+      }
+
+      .calendar-controls {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+      }
+
+      .touch-friendly {
+          min-height: 44px;
+      }
+
+      @media (hover: none) and (pointer: coarse) {
+          .calendar .has-birthday:hover {
+              background-color: #eef2ff;
+          }
+
+          .calendar .has-birthday:active {
+              background-color: #e0e7ff;
+          }
+      }
+  </style>
+{% endblock %}
 
 {% block content %}
+  <!-- Секція статистики -->
   <div class="row mb-4">
-    <div class="col">
-      <h1 class="display-4 section-title">
-        <i class="fas fa-chart-line me-3"></i>Огляд
-      </h1>
-    </div>
-  </div>
-
-  <!-- Статистичні картки -->
-  <div class="row g-4 mb-5">
-    <div class="col-lg-3 col-md-6">
-      <div class="card stat-card">
-        <div class="card-body text-center p-4">
-          <div class="mb-3">
-            <i class="fas fa-users fa-2x text-primary"></i>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card stat-card h-100">
+        <div class="card-body d-flex align-items-center">
+          <i class="fas fa-users fa-2x text-primary me-3"></i>
+          <div>
+            <h6 class="card-subtitle text-muted">Всього співробітників</h6>
+            <p class="display-6 fw-bold mb-0">{{ stats.total_employees }}</p>
           </div>
-          <h5 class="card-title text-muted mb-2">Всього співробітників</h5>
-          <h2 class="display-4 fw-bold text-dark">{{ stats.total_employees }}</h2>
         </div>
       </div>
     </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="card stat-card">
-        <div class="card-body text-center p-4">
-          <div class="mb-3">
-            <i class="fas fa-file-alt fa-2x text-success"></i>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card stat-card h-100">
+        <div class="card-body d-flex align-items-center">
+          <i class="fas fa-envelope-open-text fa-2x text-success me-3"></i>
+          <div>
+            <h6 class="card-subtitle text-muted">Активних шаблонів</h6>
+            <p class="display-6 fw-bold mb-0">{{ stats.active_templates }}</p>
           </div>
-          <h5 class="card-title text-muted mb-2">Активних шаблонів</h5>
-          <h2 class="display-4 fw-bold text-dark">{{ stats.active_templates }}</h2>
         </div>
       </div>
     </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="card stat-card">
-        <div class="card-body text-center p-4">
-          <div class="mb-3">
-            <i class="fas fa-envelope fa-2x text-warning"></i>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card stat-card h-100">
+        <div class="card-body d-flex align-items-center">
+          <i class="fas fa-paper-plane fa-2x text-info me-3"></i>
+          <div>
+            <h6 class="card-subtitle text-muted">Листів за місяць</h6>
+            <p class="display-6 fw-bold mb-0">{{ stats.monthly_emails }}</p>
           </div>
-          <h5 class="card-title text-muted mb-2">Листів цього місяця</h5>
-          <h2 class="display-4 fw-bold text-dark">{{ stats.monthly_emails }}</h2>
         </div>
       </div>
     </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="card birthday-special-card">
-        <div class="card-body text-center p-4">
-          <div class="mb-3">
-            <i class="fas fa-birthday-cake fa-2x animate-bounce"></i>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card stat-card birthday-today-card h-100">
+        <div class="card-body d-flex align-items-center">
+          <i class="fas fa-birthday-cake fa-2x text-warning me-3"></i>
+          <div>
+            <h6 class="card-subtitle text-muted">Сьогодні святкують</h6>
+            <p class="display-6 fw-bold mb-0">{{ stats.today_birthdays_count }}</p>
           </div>
-          <h5 class="card-title mb-2 opacity-75">
-            Дні народження сьогодні <i class="fas fa-gift ms-1"></i>
-          </h5>
-          <h2 class="display-4 fw-bold">{{ stats.today_birthdays_count }}</h2>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="row g-4">
-    <!-- Найближчі дні народження -->
-    <div class="col-lg-8">
+  <!-- Основний контент -->
+  <div class="row">
+    <!-- Ліва колонка: Дні народження сьогодні та найближчі -->
+    <div class="col-lg-4 col-md-12 mb-4">
+      <!-- Дні народження сьогодні -->
+      {% if today_birthdays %}
+        <div class="card birthday-special-card mb-4">
+          <div class="card-body text-center">
+            <i class="fas fa-gifts fa-3x mb-3 animate-bounce"></i>
+            <h4 class="card-title">З Днем Народження!</h4>
+            <p class="card-text">Сьогодні ми вітаємо:</p>
+            <ul class="list-unstyled">
+              {% for employee in today_birthdays %}
+                <li class="h5"><strong>{{ employee.full_name }}</strong></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Найближчі дні народження -->
       <div class="card">
-        <div class="card-header bg-transparent border-0 p-4">
-          <h3 class="section-title mb-0">
-            <i class="fas fa-calendar-day me-2"></i>Найближчі 14 днів
-          </h3>
-        </div>
-        <div class="card-body p-4">
-          <div class="list-group list-group-flush">
+        <div class="card-body">
+          <h5 class="section-title mb-3">Найближчі Дні Народження</h5>
+          <ul class="list-group list-group-flush">
             {% for item in upcoming_birthdays %}
-              <div class="list-group-item upcoming-birthday-item border-0 mb-3 p-3">
+              <li class="list-group-item d-flex justify-content-between align-items-center upcoming-birthday-item p-3 touch-friendly">
                 <div class="d-flex align-items-center">
-                  <div class="employee-avatar">
-                    {{ item.employee.full_name[0] }}
-                  </div>
-                  <div class="flex-grow-1">
-                    <h6 class="mb-1 fw-semibold">{{ item.employee.full_name }}</h6>
-                    <p class="mb-0 text-muted small">
-                      <i class="fas fa-envelope me-1"></i>{{ item.employee.email }}
-                    </p>
-                  </div>
+                  <!-- ВИПРАВЛЕНО: Доступ до вкладених даних як до словника -->
+                  <div class="employee-avatar">{{ item['employee']['full_name'][0] }}</div>
                   <div>
-                                    <span class="badge 
-                                        {% if item.days_until == 0 %}badge-today{% elif item.days_until < 4 %}badge-warning{% else %}badge-success{% endif %} 
-                                        rounded-pill px-3 py-2">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        {{ item.birthday_date.strftime('%d %B') }} 
-                                        ({% if item.days_until == 0 %}сьогодні{% else %}через {{ item.days_until }}
-                                      {% if item.days_until == 1 %}день{% elif item.days_until in [2,3,4] %}дні
-                                      {% else %}днів{% endif %}{% endif %})
-                                    </span>
+                    <h6 class="mb-0">{{ item['employee']['full_name'] }}</h6>
+                    <small class="text-muted">{{ item['employee']['position'] or 'Співробітник' }}</small>
                   </div>
                 </div>
-              </div>
+                <span
+                    class="badge {% if item['days_until'] == 0 %}badge-today{% elif item['days_until'] < 7 %}badge-warning{% else %}badge-success{% endif %}">
+                            {% if item['birthday_date'] %}
+                              {{ item['birthday_date'].strftime('%d %B') }}
+                            {% else %}
+                              Невідомо
+                            {% endif %}
+                        </span>
+              </li>
             {% else %}
-              <div class="text-center py-5">
-                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                <p class="text-muted">У найближчі 14 днів немає днів народження.</p>
-              </div>
+              <li class="list-group-item text-center text-muted p-4">
+                У найближчі 14 днів немає днів народження.
+              </li>
             {% endfor %}
-          </div>
+          </ul>
         </div>
       </div>
     </div>
 
-    <!-- Іменинники сьогодні -->
-    <div class="col-lg-4">
+    <!-- Права колонка: Календар -->
+    <div class="col-lg-8 col-md-12">
       <div class="card">
-        <div class="card-header bg-transparent border-0 p-4">
-          <h3 class="section-title mb-0">
-            <i class="fas fa-star me-2"></i>Іменинники сьогодні <i class="fas fa-sparkles ms-1"></i>
-          </h3>
-        </div>
-        <div class="card-body p-4">
-          {% if today_birthdays %}
-            {% for emp in today_birthdays %}
-              <div class="today-celebration p-4 {% if not loop.last %}mb-3{% endif %}">
-                <div class="d-flex align-items-center">
-                  <div class="me-3">
-                    <i class="fas fa-birthday-cake fa-2x text-success"></i>
-                  </div>
-                  <div>
-                    <h5 class="mb-1 fw-bold text-success">{{ emp.full_name }}</h5>
-                    <p class="mb-0 text-success">
-                      <i class="fas fa-party-horn me-1"></i>Вітаємо з днем народження!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-          {% else %}
-            <div class="text-center py-5">
-              <i class="fas fa-meh fa-3x text-muted mb-3"></i>
-              <p class="text-muted">Сьогодні ніхто не святкує.</p>
-            </div>
-          {% endif %}
+        <div class="card-body">
+          <div class="calendar-controls">
+            <button id="prevMonthBtn" class="btn btn-outline-primary touch-friendly">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <h5 id="calendarHeader" class="mb-0"></h5>
+            <button id="nextMonthBtn" class="btn btn-outline-primary touch-friendly">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="calendar">
+              <thead>
+              <tr>
+                <th>Пн</th>
+                <th>Вт</th>
+                <th>Ср</th>
+                <th>Чт</th>
+                <th>Пт</th>
+                <th class="text-danger">Сб</th>
+                <th class="text-danger">Нд</th>
+              </tr>
+              </thead>
+              <tbody id="calendarBody">
+              <!-- Дні календаря будуть згенеровані JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const calendarHeader = document.getElementById('calendarHeader');
+          const calendarBody = document.getElementById('calendarBody');
+          const prevMonthBtn = document.getElementById('prevMonthBtn');
+          const nextMonthBtn = document.getElementById('nextMonthBtn');
+
+          let currentDate = new Date();
+
+          async function renderCalendar(year, month) {
+              const monthName = new Date(year, month).toLocaleString('uk-UA', {month: 'long', year: 'numeric'});
+              calendarHeader.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+              calendarBody.innerHTML = '<tr><td colspan="7" class="text-center p-5"><div class="spinner-border text-primary" role="status"></div></td></tr>';
+
+              let birthdays = [];
+              try {
+                  const response = await fetch(`/calendar/${year}/${month + 1}`);
+                  if (response.ok) {
+                      const data = await response.json();
+                      birthdays = data.birthdays;
+                  }
+              } catch (error) {
+                  console.error("Error fetching calendar data:", error);
+              }
+
+              const firstDay = new Date(year, month, 1);
+              const lastDay = new Date(year, month + 1, 0);
+              const today = new Date();
+
+              let dayOfWeek = firstDay.getDay();
+              if (dayOfWeek === 0) dayOfWeek = 7;
+
+              let calendarHTML = '<tr>';
+
+              for (let i = 1; i < dayOfWeek; i++) {
+                  calendarHTML += '<td class="other-month"></td>';
+              }
+
+              for (let day = 1; day <= lastDay.getDate(); day++) {
+                  if (dayOfWeek > 7) {
+                      calendarHTML += '</tr><tr>';
+                      dayOfWeek = 1;
+                  }
+
+                  const dayBirthdays = birthdays.filter(b => b.day === day);
+                  let classes = '';
+                  let tooltip = '';
+
+                  if (dayBirthdays.length > 0) {
+                      classes += ' has-birthday';
+                      // На мобільних пристроях використовуємо click замість hover
+                      if (window.innerWidth <= 768) {
+                          tooltip = `onclick="showBirthdayAlert('${dayBirthdays.map(b => b.employee_name).join(', ')}')"`;
+                      } else {
+                          tooltip = `data-bs-toggle="tooltip" title="${dayBirthdays.map(b => b.employee_name).join(', ')}"`;
+                      }
+                  }
+
+                  if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                      classes += ' today';
+                  }
+
+                  calendarHTML += `<td class="${classes}" ${tooltip}><div class="day-number">${day}</div></td>`;
+                  dayOfWeek++;
+              }
+
+              while (dayOfWeek <= 7) {
+                  calendarHTML += '<td class="other-month"></td>';
+                  dayOfWeek++;
+              }
+              calendarHTML += '</tr>';
+
+              calendarBody.innerHTML = calendarHTML;
+
+              // Ініціалізуємо tooltips тільки для desktop
+              if (window.innerWidth > 768) {
+                  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                  tooltipTriggerList.map(function (tooltipTriggerEl) {
+                      return new bootstrap.Tooltip(tooltipTriggerEl);
+                  });
+              }
+          }
+
+          // Функція для показу alert на мобільних пристроях
+          window.showBirthdayAlert = function (names) {
+              alert(`Дні народження: ${names}`);
+          };
+
+          prevMonthBtn.addEventListener('click', () => {
+              currentDate.setMonth(currentDate.getMonth() - 1);
+              renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+          });
+
+          nextMonthBtn.addEventListener('click', () => {
+              currentDate.setMonth(currentDate.getMonth() + 1);
+              renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+          });
+
+          // Touch events для кращої взаємодії на мобільних пристроях
+          let touchStartX = 0;
+          let touchEndX = 0;
+
+          document.querySelector('.calendar').addEventListener('touchstart', function (e) {
+              touchStartX = e.changedTouches[0].screenX;
+          });
+
+          document.querySelector('.calendar').addEventListener('touchend', function (e) {
+              touchEndX = e.changedTouches[0].screenX;
+              handleSwipe();
+          });
+
+          function handleSwipe() {
+              if (touchEndX < touchStartX - 50) {
+                  // Swipe left - next month
+                  currentDate.setMonth(currentDate.getMonth() + 1);
+                  renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+              }
+              if (touchEndX > touchStartX + 50) {
+                  // Swipe right - previous month
+                  currentDate.setMonth(currentDate.getMonth() - 1);
+                  renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+              }
+          }
+
+          renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+      });
+  </script>
 {% endblock %}

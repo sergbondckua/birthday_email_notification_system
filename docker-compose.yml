@@ -60,7 +60,7 @@ services:
     build: .
     container_name: bdaygo_flower
     restart: always
-    command: celery -A celery_worker.celery flower --port=5555 --url_prefix=/
+    command: celery -A celery_worker.celery flower --port=5555 --address=0.0.0.0 --broker=redis://bdaygo_redis:6379/0
     ports:
       - "5555:5555"
     env_file:

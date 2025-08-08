@@ -27,6 +27,12 @@
                     </a>
                 </li>
               <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'logs.logs_page' else '' }}"
+                       href="{{ url_for('logs.logs_page') if url_for else '/logs/' }}">
+                        <i class="fas fa-file-alt me-1"></i>Логи
+                    </a>
+                </li>
+              <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'auth.profile' else '' }}"
                        href="{{ url_for('auth.profile_api') if url_for else '/profile/' }}">
                         <i class="fas fa-file-alt me-1"></i>Профіль

@@ -1,0 +1,295 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Логи та Статистика - BirthdayApp{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <!-- Секція статистики -->
+    <div class="row mb-4" id="stats-cards">
+      <!-- Картки будуть завантажені через JS -->
+      <div class="col-12 text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Завантаження...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Секція з графіком -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Активність розсилки за останні 30 днів</h5>
+            <canvas id="activityChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Секція логів -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Історія розсилок</h5>
+          </div>
+          <div class="card-body">
+            <!-- Фільтри -->
+            <form id="filtersForm" class="row g-3 align-items-center mb-4">
+              <div class="col-md-3">
+                <label for="statusFilter" class="form-label">Статус</label>
+                <select id="statusFilter" class="form-select">
+                  <option value="">Всі статуси</option>
+                  <option value="sent">Надіслано</option>
+                  <option value="failed">Помилка</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="dateFromFilter" class="form-label">Дата від</label>
+                <input type="date" id="dateFromFilter" class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label for="dateToFilter" class="form-label">Дата до</label>
+                <input type="date" id="dateToFilter" class="form-control">
+              </div>
+              <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Фільтрувати</button>
+                <button type="reset" class="btn btn-secondary">Скинути</button>
+              </div>
+            </form>
+
+            <!-- Таблиця логів -->
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Співробітник</th>
+                  <th>Шаблон</th>
+                  <th>Статус</th>
+                  <th>Деталі</th>
+                </tr>
+                </thead>
+                <tbody id="logsTableBody">
+                <!-- Рядки будуть завантажені через JS -->
+                </tbody>
+              </table>
+            </div>
+            <div id="logs-placeholder" class="text-center p-5" style="display: none;">
+              <h5>Немає записів, що відповідають вашому запиту.</h5>
+              <p class="text-muted">Спробуйте змінити фільтри або скинути їх.</p>
+            </div>
+
+            <!-- Пагінація -->
+            <nav id="pagination" class="d-flex justify-content-between align-items-center mt-3">
+              <!-- Елементи пагінації будуть завантажені через JS -->
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          // Глобальні змінні
+          let activityChart;
+          const filtersForm = document.getElementById('filtersForm');
+
+          // --- Функції для завантаження даних ---
+
+          // Завантаження статистики та ініціалізація графіка
+          async function loadStats() {
+              try {
+                  const response = await fetch('/logs/api/stats');
+                  if (!response.ok) throw new Error('Network response was not ok');
+                  const data = await response.json();
+
+                  renderStatsCards(data.stats);
+                  renderActivityChart(data.daily_stats);
+              } catch (error) {
+                  console.error('Error loading stats:', error);
+                  document.getElementById('stats-cards').innerHTML = '<p class="text-danger">Не вдалося завантажити статистику.</p>';
+              }
+          }
+
+          // Завантаження логів
+          async function loadLogs(page = 1) {
+              const status = document.getElementById('statusFilter').value;
+              const dateFrom = document.getElementById('dateFromFilter').value;
+              const dateTo = document.getElementById('dateToFilter').value;
+
+              const params = new URLSearchParams({page, status, date_from: dateFrom, date_to: dateTo});
+              const url = `/logs/api/logs?${params.toString()}`;
+
+              try {
+                  const response = await fetch(url);
+                  if (!response.ok) throw new Error('Network response was not ok');
+                  const data = await response.json();
+
+                  renderLogsTable(data.logs);
+                  renderPagination(data);
+
+                  const placeholder = document.getElementById('logs-placeholder');
+                  placeholder.style.display = data.logs.length === 0 ? 'block' : 'none';
+
+              } catch (error) {
+                  console.error('Error loading logs:', error);
+                  document.getElementById('logsTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Не вдалося завантажити логи.</td></tr>';
+              }
+          }
+
+          // --- Функції для рендерингу ---
+
+          // Рендеринг карток статистики
+          function renderStatsCards(stats) {
+              const container = document.getElementById('stats-cards');
+              container.innerHTML = `
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-subtitle mb-2 text-muted">Всього надіслано</h6>
+                            <p class="display-6 fw-bold">${stats.total_sent}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card birthday-today-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-subtitle mb-2 text-muted">Успішність</h6>
+                            <p class="display-6 fw-bold">${stats.success_rate}%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-subtitle mb-2 text-muted">Всього отримувачів</h6>
+                            <p class="display-6 fw-bold">${stats.total_recipients}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-subtitle mb-2 text-muted">Помилок</h6>
+                            <p class="display-6 fw-bold text-danger">${stats.total_failed}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+          }
+
+          // Рендеринг графіка
+          function renderActivityChart(dailyStats) {
+              const ctx = document.getElementById('activityChart').getContext('2d');
+              const labels = dailyStats.map(s => new Date(s.date).toLocaleDateString('uk-UA'));
+              const data = dailyStats.map(s => s.emails_sent);
+
+              if (activityChart) {
+                  activityChart.destroy();
+              }
+
+              activityChart = new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                      labels: labels,
+                      datasets: [{
+                          label: 'Надіслано листів',
+                          data: data,
+                          borderColor: 'rgba(99, 102, 241, 1)',
+                          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                          fill: true,
+                          tension: 0.3
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      scales: {y: {beginAtZero: true}}
+                  }
+              });
+          }
+
+          // Рендеринг таблиці логів
+          function renderLogsTable(logs) {
+              const tbody = document.getElementById('logsTableBody');
+              tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${log.sent_date}</td>
+                    <td>
+                        <div>${log.employee?.full_name || 'N/A'}</div>
+                        <small class="text-muted">${log.employee?.email || ''}</small>
+                    </td>
+                    <td>${log.template?.name || 'N/A'}</td>
+                    <td>
+                        <span class="badge ${log.status === 'sent' ? 'badge-success' : 'badge-danger'}">
+                            ${log.status === 'sent' ? 'Надіслано' : 'Помилка'}
+                        </span>
+                    </td>
+                    <td>
+                        ${log.status === 'failed' && log.error_message ?
+                  `<button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="${log.error_message}">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </button>` :
+                  `<span class="text-muted">К-ть: ${log.recipients_count}</span>`
+              }
+                    </td>
+                </tr>
+            `).join('');
+
+              // Ініціалізація tooltips
+              const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+              tooltipTriggerList.map(function (tooltipTriggerEl) {
+                  return new bootstrap.Tooltip(tooltipTriggerEl);
+              });
+          }
+
+          // Рендеринг пагінації
+          function renderPagination(data) {
+              const container = document.getElementById('pagination');
+              if (data.pages <= 1) {
+                  container.innerHTML = '';
+                  return;
+              }
+              container.innerHTML = `
+                <span class="text-muted">Сторінка ${data.current_page} з ${data.pages} (Всього: ${data.total})</span>
+                <div>
+                    <button class="btn btn-outline-secondary" ${!data.has_prev ? 'disabled' : ''} onclick="changePage(${data.current_page - 1})">
+                        <i class="fas fa-arrow-left"></i> Назад
+                    </button>
+                    <button class="btn btn-outline-secondary" ${!data.has_next ? 'disabled' : ''} onclick="changePage(${data.current_page + 1})">
+                        Вперед <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+          }
+
+          // --- Обробники подій ---
+
+          // Зміна сторінки
+          window.changePage = function (page) {
+              loadLogs(page);
+          }
+
+          // Фільтрація
+          filtersForm.addEventListener('submit', function (e) {
+              e.preventDefault();
+              loadLogs(1);
+          });
+
+          // Скидання фільтрів
+          filtersForm.addEventListener('reset', function () {
+              setTimeout(() => loadLogs(1), 0);
+          });
+
+          // --- Ініціалізація ---
+          loadStats();
+          loadLogs();
+      });
+  </script>
+{% endblock %}

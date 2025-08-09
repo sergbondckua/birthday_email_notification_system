@@ -249,19 +249,6 @@ body {
   border-radius: 12px 12px 0 0;
 }
 
-.pagination .page-link {
-  border-radius: 10px;
-  margin: 0 2px;
-  border: none;
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-.pagination .page-item.active .page-link {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  border-color: transparent;
-}
-
 .alert {
   border-radius: 12px;
   border: none;

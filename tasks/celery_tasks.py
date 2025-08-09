@@ -21,7 +21,7 @@ def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
     with app.app_context():
         try:
             today = date.today()
-            logger.info(f"Запуск щоденної перевірки ДН для {today}")
+            logger.info("Запуск щоденної перевірки ДН для %s", today)
             email_service = EmailService()
 
             # Отримати активний шаблон
@@ -49,11 +49,14 @@ def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
 
                 if success:
                     logger.info(
-                        f"Успішно відправлено повідомлення для {employee.full_name}"
+                        "Успішно відправлено повідомлення для %s",
+                        employee.full_name,
                     )
                 else:
                     logger.error(
-                        f"Помилка відправки для {employee.full_name}: {message}"
+                        "Помилка відправки для %s: %s",
+                        employee.full_name,
+                        message,
                     )
 
                 results.append(
@@ -95,14 +98,16 @@ def retry_failed_email(self, employee_id: int, template_id: int) -> str:
 
             if not success and self.request.retries < self.max_retries:
                 logger.warning(
-                    f"Повторна спроба {self.request.retries + 1} для {employee.full_name}"
+                    "Повторна спроба %d для %s",
+                    self.request.retries + 1,
+                    employee.full_name,
                 )
                 raise self.retry(countdown=300)  # Повторити
 
             return message
 
         except Exception as e:
-            logger.error(f"Помилка в повторній спробі: {str(e)}")
+            logger.error("Помилка в повторній спробі: %s", str(e), exc_info=True)
             if self.request.retries < self.max_retries:
                 raise self.retry(countdown=300)
             return f"Помилка після всіх спроб: {str(e)}"

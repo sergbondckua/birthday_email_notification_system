@@ -32,8 +32,12 @@
             <button class="btn btn-sm btn-outline-secondary" onclick="openPreviewModal({{ template.id }})">
               <i class="fas fa-eye me-1"></i> Перегляд
             </button>
-            <button class="btn btn-sm btn-outline-primary"
-                    onclick="openEditModal({{ template.id }}, '{{ template.name }}', '{{ template.subject }}', `{{ template.template_text | safe }}`, {{ 'true' if template.is_active else 'false' }})">
+            <button class="btn btn-sm btn-outline-primary edit-btn"
+                    data-id="{{ template.id }}"
+                    data-name="{{ template.name }}"
+                    data-subject="{{ template.subject }}"
+                    data-text="{{ template.template_text }}"
+                    data-is-active="{{ 'true' if template.is_active else 'false' }}">
               <i class="fas fa-edit me-1"></i> Редагувати
             </button>
             {% if not template.is_active %}
@@ -179,11 +183,26 @@
           document.getElementById('templateId').value = id;
           document.getElementById('templateName').value = name;
           document.getElementById('templateSubject').value = subject;
-          document.getElementById('templateText').value = text;
+          document.getElementById('templateText').value = text; // Тепер сюди прийде чистий текст
           document.getElementById('templateIsActive').checked = isActive;
           document.getElementById('templateModalLabel').textContent = 'Редагувати Шаблон';
           templateModal.show();
       }
+
+      // Додаємо обробник подій для кнопок редагування
+      document.addEventListener('DOMContentLoaded', () => {
+          document.querySelectorAll('.edit-btn').forEach(button => {
+              button.addEventListener('click', () => {
+                  const id = button.dataset.id;
+                  const name = button.dataset.name;
+                  const subject = button.dataset.subject;
+                  const text = button.dataset.text;
+                  const isActive = button.dataset.isActive === 'true';
+
+                  openEditModal(id, name, subject, text, isActive);
+              });
+          });
+      });
 
       // Збереження шаблону (створення/оновлення)
       document.getElementById('saveTemplateBtn').addEventListener('click', async () => {

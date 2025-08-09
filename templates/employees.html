@@ -265,13 +265,15 @@
         <div class="modal-body">
           <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>
-            <strong>Формат CSV, Excel файлу:</strong> <code>first_name,last_name,email,birth_date</code> (ДД.ММ.РРРР)
+            <strong>Формат CSV, Excel файлу:</strong> <code>first_name,last_name,email,birth_date</code> (дд.мм.рррр),
+            формат всіх полів: <code>текстовий</code>
           </div>
 
           <div class="import-drop-zone text-center p-5" id="dropZone">
             <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
             <h5>Перетягніть CSV, Excel файл сюди</h5>
-            <p class="text-muted"><i class="fa-solid fa-file-csv fa-2x text-warning"></i> <i class="fa-solid fa-file-excel fa-2x text-success"></i></p>
+            <p class="text-muted"><i class="fa-solid fa-file-csv fa-2x text-warning"></i> <i
+                class="fa-solid fa-file-excel fa-2x text-success"></i></p>
             <p class="text-muted">або натисніть для вибору</p>
             <input type="file" id="csvFile" accept=".csv, .xlsx, .xls" class="d-none">
             <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('csvFile').click()">
@@ -303,7 +305,7 @@
     <div id="toast" class="toast" role="alert">
       <div class="toast-header">
         <i class="fas fa-info-circle me-2 text-primary"></i>
-        <strong class="me-auto">BirthdayApp</strong>
+        <strong class="me-auto">BirthdayGo</strong>
         <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
       </div>
       <div class="toast-body" id="toastMessage"></div>

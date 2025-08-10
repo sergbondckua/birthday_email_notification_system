@@ -1,11 +1,11 @@
 :root {
-    --primary-color: #6366f1;
+    --primary-color: #7aa2f7;
     --secondary-color: #8b5cf6;
     --success-color: #10b981;
     --warning-color: #f59e0b;
     --danger-color: #ef4444;
     --dark-color: #1f2937;
-    --light-bg: #f8fafc;
+    --light-bg: #1a1b26;
 }
 
 body.login-page {
@@ -29,7 +29,7 @@ body.login-page {
 
 /* Хедер */
 .login-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, var(--light-bg), var(--secondary-color));
     color: white;
     text-align: center;
     padding: 3rem 2rem 2rem;
@@ -114,7 +114,7 @@ body.login-page {
     width: 20px;
     height: 20px;
     border: 2px solid transparent;
-    border-top: 2px solid currentColor;
+    border-top-color: currentColor;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }

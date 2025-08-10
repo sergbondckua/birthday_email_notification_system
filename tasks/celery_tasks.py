@@ -21,7 +21,7 @@ def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
     with app.app_context():
         try:
             today = date.today()
-            logger.info("Запуск щоденної перевірки ДН для %s", today)
+            logger.info("Запуск щоденної перевірки ДН %s", today)
             email_service = EmailService()
 
             # Отримати активний шаблон
@@ -29,7 +29,9 @@ def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
                 is_active=True
             ).first()
             if not active_template:
-                logger.warning("Не знайдено активного шаблону")
+                logger.warning(
+                    "Не знайдено активного шаблону листа, створіть новий або активізуєте існуючий"
+                )
                 return "Не знайдено активного шаблону"
 
             # Отримати співробітників для повідомлення
@@ -38,8 +40,8 @@ def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
             )
 
             if not employees_to_notify:
-                logger.info("Немає співробітників для повідомлення сьогодні")
-                return "Немає співробітників для повідомлення"
+                logger.info("Немає найближчих ДН для нагадування")
+                return "Немає найближчих ДН для нагадування"
 
             results = []
             for employee in employees_to_notify:
@@ -49,12 +51,12 @@ def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
 
                 if success:
                     logger.info(
-                        "Успішно відправлено повідомлення для %s",
+                        "Успішно відправлено нагадування про ДН %s",
                         employee.full_name,
                     )
                 else:
                     logger.error(
-                        "Помилка відправки для %s: %s",
+                        "Помилка відправки нагадування про ДН %s: %s",
                         employee.full_name,
                         message,
                     )
@@ -107,7 +109,9 @@ def retry_failed_email(self, employee_id: int, template_id: int) -> str:
             return message
 
         except Exception as e:
-            logger.error("Помилка в повторній спробі: %s", str(e), exc_info=True)
+            logger.error(
+                "Помилка в повторній спробі: %s", str(e), exc_info=True
+            )
             if self.request.retries < self.max_retries:
                 raise self.retry(countdown=300)
             return f"Помилка після всіх спроб: {str(e)}"

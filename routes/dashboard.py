@@ -26,6 +26,7 @@ def dashboard():
             "active_templates": EmailTemplate.query.filter_by(
                 is_active=True
             ).count(),
+            "total_templates": EmailTemplate.query.count(),
             "monthly_emails": EmailLog.query.filter(
                 EmailLog.sent_date >= date.today().replace(day=1),
                 EmailLog.status == "sent",

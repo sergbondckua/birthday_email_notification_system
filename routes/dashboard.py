@@ -17,6 +17,8 @@ def dashboard():
             days_ahead=14
         )
         today_birthdays = BirthdayService.get_birthday_employees(date.today())
+        current_month_birthdays = BirthdayService.get_birthdays_for_month(
+            date.today().year, date.today().month)
 
         # Збираємо статистику
         stats = {
@@ -29,6 +31,7 @@ def dashboard():
                 EmailLog.status == "sent",
             ).count(),
             "today_birthdays_count": len(today_birthdays),
+            "monthly_birthdays_count": len(current_month_birthdays),
         }
 
         # Рендеримо HTML-шаблон, передаючи в нього дані

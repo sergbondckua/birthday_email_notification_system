@@ -34,10 +34,10 @@
   <!-- Статистика -->
   <div class="row mb-4">
     <div class="col-md-3">
-      <div class="card stat-card">
+      <div class="card stat-card birthday-warning-card">
         <div class="card-body text-center p-3">
           <h5 class="text-muted mb-1">Всього співробітників</h5>
-          <h3 class="fw-bold text-dark" id="totalEmployees">{{ employees.total if employees else 0 }}</h3>
+          <h3 class="display-6 fw-bold mb-0" id="totalEmployees">{{ employees.total if employees else 0 }}</h3>
         </div>
       </div>
     </div>
@@ -45,7 +45,7 @@
       <div class="card stat-card">
         <div class="card-body text-center p-3">
           <h5 class="text-muted mb-1">Поточна сторінка</h5>
-          <h3 class="fw-bold text-dark">{{ employees.page if employees else 1 }}</h3>
+          <h3 class="display-6 fw-bold mb-0">{{ employees.page if employees else 1 }}</h3>
         </div>
       </div>
     </div>
@@ -53,15 +53,15 @@
       <div class="card stat-card">
         <div class="card-body text-center p-3">
           <h5 class="text-muted mb-1">Всього сторінок</h5>
-          <h3 class="fw-bold text-dark">{{ employees.pages if employees else 1 }}</h3>
+          <h3 class="display-6 fw-bold mb-0">{{ employees.pages if employees else 1 }}</h3>
         </div>
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card stat-card">
+      <div class="card stat-card birthday-today-card">
         <div class="card-body text-center p-3">
           <h5 class="text-muted mb-1">На сторінці</h5>
-          <h3 class="fw-bold text-dark">{{ employees.items|length if employees else 0 }}</h3>
+          <h3 class="display-6 fw-bold mb-0">{{ employees.items|length if employees else 0 }}</h3>
         </div>
       </div>
     </div>

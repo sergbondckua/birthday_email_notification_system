@@ -5,6 +5,7 @@
     --warning-color: #ff9e64;
     --danger-color: #f7768e;
     --dark-color: #1f2937;
+    --info-color: #0dc9ee;
     --light-bg: #1a1b26;
     --card-bg: rgba(255, 255, 255, 0.95);
     --border-color: #414868;
@@ -113,6 +114,21 @@ body {
 
 .birthday-special-card {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.birthday-danger-card::before {
+    background: linear-gradient(135deg, var(--danger-color), #f87171);
+    color: white;
+}
+
+.birthday-warning-card::before {
+    background: linear-gradient(135deg, var(--warning-color), #fb923c);
+    color: white;
+}
+
+.birthday-info-card::before {
+    background: linear-gradient(135deg, var(--info-color), #06b6d4);
     color: white;
 }
 

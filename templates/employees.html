@@ -7,7 +7,7 @@
 {% block content %}
 
   <!-- Панель управління -->
-  <div class="row mb-4">
+  <div class="row mb-2">
     <div class="col-md-6">
       <div class="input-group">
             <span class="input-group-text bg-white border-end-0">
@@ -17,14 +17,18 @@
                placeholder="Пошук співробітників..." value="{{ request.args.get('search', '') }}">
       </div>
     </div>
-    <div class="col-md-6 text-end">
-      <button class="btn btn-gradient me-2" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-        <i class="fas fa-plus me-2"></i>Додати співробітника
-      </button>
-      <button class="btn btn-success-gradient" data-bs-toggle="modal" data-bs-target="#importModal">
-        <i class="fas fa-file-import me-2"></i>Імпорт CSV, XLSX
-      </button>
-    </div>
+  </div>
+  <!-- Кнопки управління -->
+  <div class="row mb-4">
+  <div class="col text-end">
+    <button class="btn btn-gradient me-2" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+      <i class="fas fa-plus me-2"></i>Додати
+    </button>
+    <button class="btn btn-success-gradient" data-bs-toggle="modal" data-bs-target="#importModal">
+      <i class="fas fa-file-import me-2"></i>Імпорт CSV, XLSX
+    </button>
+  </div>
+
   </div>
 
   <!-- Статистика -->

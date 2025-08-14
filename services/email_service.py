@@ -45,7 +45,7 @@ class EmailService:
         self,
         notification_date: date,
     ) -> List[Employee]:
-        """Отримати список співробітників для яких потрібно відправити повідомлення"""
+        """Отримати список співробітників про яких потрібно відправити повідомлення"""
         employees_to_notify = []
         current_year = notification_date.year
 

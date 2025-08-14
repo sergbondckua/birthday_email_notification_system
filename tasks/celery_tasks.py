@@ -34,7 +34,7 @@ def send_daily_birthday_notifications() -> List[Dict[str, Any]] | str:
                 )
                 return "Не знайдено активного шаблону"
 
-            # Отримати співробітників для повідомлення
+            # Отримати співробітників для повідомлення про їх ДН
             employees_to_notify = email_service.get_employees_for_notification(
                 today
             )

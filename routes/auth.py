@@ -1,3 +1,4 @@
+import pytz
 from flask import (
     Blueprint,
     request,
@@ -6,6 +7,7 @@ from flask import (
     redirect,
     url_for,
     flash,
+    current_app,
 )
 from flask_login import login_user, logout_user, login_required, current_user
 from models import Admin, AdminRole
@@ -72,6 +74,7 @@ def profile_page():
 @login_required
 def profile_api():
     """API endpoint для отримання інформації про поточного користувача"""
+    local_tz = pytz.timezone(current_app.config["TIMEZONE"])
     return (
         jsonify(
             {
@@ -79,7 +82,9 @@ def profile_api():
                     "id": current_user.id,
                     "username": current_user.username,
                     "role": current_user.role.value,
-                    "created_at": current_user.created_at.isoformat(),
+                    "created_at": local_tz.localize(
+                        current_user.created_at
+                    ).isoformat(),
                 }
             }
         ),

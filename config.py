@@ -8,7 +8,7 @@ env.read_env()
 class Config:
     """Клас конфігурації Flask додатку."""
 
-    DEBUG = True
+    DEBUG = False
 
     SECRET_KEY = (
         env.str("SECRET_KEY") or "JJJHou8u^8556@(*5CCHHnvhvggvgfccf!"

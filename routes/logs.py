@@ -123,7 +123,7 @@ def get_logs():
 def get_stats():
     """API: Отримати статистику розсилки."""
     try:
-        # Отримуємо дату 30 днів в тому локальному часовому поясі
+        # Отримуємо дату 30 днів тому в локальному часовому поясі
         local_tz = pytz.timezone(current_app.config["TIMEZONE"])
         thirty_days_ago = datetime.now(local_tz) - timedelta(days=30)
         thirty_days_ago_utc = thirty_days_ago.astimezone(pytz.utc)
@@ -140,13 +140,9 @@ def get_stats():
             or 0
         )
 
-        # Для статистики по днях конвертуємо час в локальний часовий пояс
-        daily_stats_raw = (
-            db.session.query(
-                EmailLog.sent_date,
-                db.func.count(EmailLog.id).label("count"),
-            )
-            .filter(
+        # Отримуємо всі записи для групування по локальних датах
+        all_logs = (
+            EmailLog.query.filter(
                 EmailLog.sent_date >= thirty_days_ago_utc,
                 EmailLog.status == "sent",
             )
@@ -154,14 +150,14 @@ def get_stats():
             .all()
         )
 
-        # Групуємо по датах в локальному часовому поясі
+        # Групуємо по локальних датах
         daily_stats_dict = {}
-        for stat in daily_stats_raw:
-            local_date = convert_to_local_time(stat.sent_date).date()
+        for log in all_logs:
+            local_date = convert_to_local_time(log.sent_date).date()
             if local_date in daily_stats_dict:
-                daily_stats_dict[local_date] += stat.count
+                daily_stats_dict[local_date] += 1
             else:
-                daily_stats_dict[local_date] = stat.count
+                daily_stats_dict[local_date] = 1
 
         daily_stats = [
             {"date": date.strftime("%Y-%m-%d"), "emails_sent": count}

@@ -36,7 +36,7 @@ class Config:
     )
 
     # Часова зона
-    TIMEZONE = env.str("TIMEZONE")
+    TIMEZONE = env.str("TIMEZONE") or "Europe/Kyiv"
 
     # Налаштування Email відправлення
     EMAIL_SEND_TIME = env.int("EMAIL_SEND_TIME")

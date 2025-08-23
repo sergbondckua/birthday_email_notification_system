@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, jsonify
+import pytz
+from flask import Blueprint, render_template, jsonify, current_app
 from flask_login import login_required
 from services.birthday_service import BirthdayService
 from models import Employee, EmailTemplate, EmailLog
-from datetime import date
+from datetime import date, datetime
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -11,14 +12,24 @@ dashboard_bp = Blueprint("dashboard", __name__)
 @login_required
 def dashboard():
     """Головна сторінка з оглядом"""
+
+    days_ahead = 14  # Відображаємо найближчі ДН за кількістю днів
+
     try:
         # Отримуємо всі необхідні дані
         upcoming_birthdays = BirthdayService.get_upcoming_birthdays(
-            days_ahead=14
+            days_ahead=days_ahead
         )
-        today_birthdays = BirthdayService.get_birthday_employees(date.today())
+        today_local = datetime.now(
+            tz=pytz.timezone(current_app.config["TIMEZONE"])
+        )
+        today_utc = today_local.astimezone(pytz.utc)
+        today_birthdays = BirthdayService.get_birthday_employees(
+            today_utc.date()
+        )
         current_month_birthdays = BirthdayService.get_birthdays_for_month(
-            date.today().year, date.today().month)
+            today_utc.year, today_utc.month
+        )
 
         # Збираємо статистику
         stats = {

@@ -58,7 +58,7 @@ class BirthdayService:
         )  # Сортуємо за кількістю днів
 
     @staticmethod
-    def get_birthdays_for_month(year: int, month: int) -> List[dict]:
+    def get_birthdays_for_month(year: int, month: int) -> List[Employee]:
         """Отримати всі ДН для конкретного місяця"""
 
         # Отримати всіх співробітників
@@ -108,7 +108,7 @@ class BirthdayService:
         return notifications
 
     @staticmethod
-    def get_birthday_employees(today):
+    def get_birthday_employees(today: date) -> List[Employee]:
         """Отримати співробітників з ДН в конкретну дату"""
         return Employee.query.filter(
             db.extract("month", Employee.birth_date) == today.month,
